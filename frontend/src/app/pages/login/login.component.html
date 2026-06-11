@@ -1,0 +1,166 @@
+﻿<!-- ── LOGIN PAGE ──────────────────────────────────────────── -->
+<div class="login-page">
+
+  <!-- LEFT — Brand Immersion Panel -->
+  <div class="login-left">
+    <!-- Decorative pine branch SVG pattern -->
+    <div class="left-decor-top"></div>
+    <div class="left-decor-bottom"></div>
+
+    <!-- Hotel identity -->
+    <div class="login-left-header">
+      <div class="hotel-badge">
+        <span class="badge-star">✦</span>
+        <span class="badge-text">EST. 1887</span>
+        <span class="badge-star">✦</span>
+      </div>
+      <h1 class="hotel-name">Salzburger Hof</h1>
+      <p class="hotel-location">Salzburg · Austria</p>
+    </div>
+
+    <!-- Main quote -->
+    <div class="login-left-middle">
+      <h2 class="login-headline">
+        Where the Alps<br/>
+        <em>meet warmth.</em>
+      </h2>
+      <div class="divider-line"></div>
+      <p class="login-left-desc">
+        Staff portal for hotel operations. Serving guests with care since 1887 — from the heart of the Austrian Alps.
+      </p>
+    </div>
+
+    <!-- Staff roles -->
+    <div class="login-left-footer">
+      <p class="roles-label">PORTAL ACCESS FOR</p>
+      <div class="staff-roles">
+        <div class="staff-role-item">
+          <span class="role-icon">⬡</span>
+          <span>Administration</span>
+        </div>
+        <div class="staff-role-item">
+          <span class="role-icon">🛎</span>
+          <span>Concierge & Reception</span>
+        </div>
+        <div class="staff-role-item">
+          <span class="role-icon">🧹</span>
+          <span>Housekeeping</span>
+        </div>
+        <div class="staff-role-item">
+          <span class="role-icon">🔧</span>
+          <span>Maintenance</span>
+        </div>
+        <div class="staff-role-item">
+          <span class="role-icon">🏨</span>
+          <span>Guest Services</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — Login Form -->
+  <div class="login-right">
+    <div class="login-form-box">
+
+      <!-- Form header -->
+      <div class="form-header">
+        <p class="form-eyebrow">STAFF PORTAL</p>
+        <h2 class="login-form-title">Welcome back</h2>
+        <p class="login-form-sub">Sign in to access your dashboard</p>
+      </div>
+
+      <!-- Form -->
+      <form class="login-form" (ngSubmit)="onLogin()" #loginFormRef="ngForm">
+        <div class="form-group">
+          <label class="form-label" for="username-input">Username</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              id="username-input"
+              class="form-input form-input--icon"
+              type="text"
+              [(ngModel)]="form.username"
+              name="username"
+              placeholder="your.username"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password-input">Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              id="password-input"
+              class="form-input form-input--icon"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="form.password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="input-eye"
+              (click)="showPassword = !showPassword"
+              tabindex="-1"
+            >{{ showPassword ? '🙈' : '👁' }}</button>
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="login-error">
+            <span>⚠</span>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <button
+          id="login-submit-btn"
+          type="submit"
+          class="btn btn-primary login-btn"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            <span class="spinner"></span>
+            <span>Signing in…</span>
+          } @else {
+            <span>Sign In</span>
+            <span class="btn-arrow">→</span>
+          }
+        </button>
+      </form>
+
+      <!-- Quick credential hints -->
+      <div class="credential-hints">
+        <p class="hints-title">Quick Access — Click to fill</p>
+        <div class="hint-grid">
+          @for (hint of hints; track hint.role) {
+            <button
+              class="hint-item"
+              [id]="'hint-' + hint.role.toLowerCase()"
+              type="button"
+              (click)="fillCredentials(hint.username, hint.password)"
+            >
+              <span class="hint-icon">{{ hint.icon }}</span>
+              <div class="hint-info">
+                <span class="hint-role">{{ hint.role }}</span>
+                <span class="hint-user">{{ hint.username }}</span>
+              </div>
+              <span class="hint-arrow">↗</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="back-link">
+        <button type="button" (click)="goBack()">← Back to hotel website</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

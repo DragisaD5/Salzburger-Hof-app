@@ -1,0 +1,159 @@
+﻿<div class="dashboard-layout">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="dashboard-logo">Salzburger Hof</div>
+    <div class="dashboard-user">
+      <span>{{ user?.displayName }}</span>
+      <span class="role-pill">GUEST</span>
+      <button class="btn btn-ghost btn-sm" id="guest-logout-btn" (click)="logout()">LOGOUT</button>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+    <!-- Welcome Banner -->
+    <div class="guest-welcome">
+      <div class="welcome-left">
+        <p class="welcome-eyebrow">WELCOME BACK</p>
+        <h1 class="welcome-name heading-display">{{ user?.displayName | uppercase }}</h1>
+        <p class="welcome-room">
+          Your suite is
+          <span class="room-highlight">Room {{ user?.roomNumber }}</span>
+        </p>
+      </div>
+      @if (myRoom()) {
+        <div class="welcome-room-card">
+          <div class="room-card-number">{{ myRoom()!.roomNumber }}</div>
+          <div class="room-card-category">{{ myRoom()!.category }}</div>
+          <div class="room-card-badges">
+            <span class="badge" [class]="'badge-' + myRoom()!.status.toLowerCase()">{{ myRoom()!.status }}</span>
+            @if (myRoom()!.isVIP) {
+              <span class="badge badge-vip">✦ VIP</span>
+            }
+          </div>
+          <div class="room-card-price">€{{ myRoom()!.pricePerNight }}<span>/night</span></div>
+          <div class="room-card-amenities">
+            @for (amenity of myRoom()!.amenities.slice(0,4); track amenity) {
+              <span class="amenity-tag">{{ amenity }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button
+        class="quick-action-btn"
+        id="guest-new-request-btn"
+        (click)="showTicketForm.set(!showTicketForm())"
+      >
+        <span class="qa-icon">🔧</span>
+        <span class="qa-label">MAINTENANCE REQUEST</span>
+      </button>
+      <div class="quick-action-btn quick-action-info">
+        <span class="qa-icon">🛎</span>
+        <span class="qa-label">ROOM SERVICE</span>
+        <span class="qa-sub">Call Ext. 0</span>
+      </div>
+      <div class="quick-action-btn quick-action-info">
+        <span class="qa-icon">🧖</span>
+        <span class="qa-label">SPA BOOKING</span>
+        <span class="qa-sub">Call Ext. 2</span>
+      </div>
+      <div class="quick-action-btn quick-action-info">
+        <span class="qa-icon">🍽</span>
+        <span class="qa-label">DINING RESERVATION</span>
+        <span class="qa-sub">Call Ext. 3</span>
+      </div>
+    </div>
+
+    <!-- Ticket Form -->
+    @if (showTicketForm()) {
+      <div class="ticket-form-panel">
+        <h2 class="panel-title">NEW SERVICE REQUEST — ROOM {{ user?.roomNumber }}</h2>
+
+        <div class="ticket-form-grid">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" [(ngModel)]="newTicket.category" name="category">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-input" [(ngModel)]="newTicket.priority" name="priority">
+              @for (p of priorities; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group form-group--full">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-input"
+              [(ngModel)]="newTicket.description"
+              name="description"
+              rows="3"
+              placeholder="Please describe the issue or request in detail..."
+            ></textarea>
+          </div>
+        </div>
+
+        @if (ticketError()) {
+          <p class="text-danger mt-8" style="font-size:13px;">⚠ {{ ticketError() }}</p>
+        }
+
+        <div class="flex gap-12 mt-16">
+          <button class="btn btn-primary" id="guest-submit-request-btn" (click)="submitTicket()">
+            SUBMIT REQUEST
+          </button>
+          <button class="btn btn-ghost" (click)="showTicketForm.set(false)">CANCEL</button>
+        </div>
+      </div>
+    }
+
+    <!-- Success Toast -->
+    @if (ticketSuccess()) {
+      <div class="toast success">✓ {{ ticketSuccess() }}</div>
+    }
+
+    <!-- My Requests -->
+    <div class="section-header mt-32">
+      <h2>MY SERVICE REQUESTS</h2>
+      <span class="text-muted" style="font-size:12px;">ROOM {{ user?.roomNumber }}</span>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-center"><span class="spinner"></span></div>
+    } @else if (tickets().length === 0) {
+      <div class="empty-state">
+        <p class="empty-icon">✓</p>
+        <p class="empty-title">ALL CLEAR</p>
+        <p class="empty-sub">No open service requests for your suite.</p>
+      </div>
+    } @else {
+      <div class="tickets-list">
+        @for (ticket of tickets(); track ticket._id) {
+          <div class="ticket-card" [class]="ticket.priority.toLowerCase()">
+            <div class="ticket-header">
+              <div class="ticket-meta">
+                <span class="ticket-room">Room {{ ticket.roomNumber }}</span>
+                <span class="ticket-category">{{ ticket.category }}</span>
+              </div>
+              <div class="ticket-badges">
+                <span class="badge" [class]="getPriorityClass(ticket.priority)">{{ ticket.priority }}</span>
+                <span class="badge" [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+              </div>
+            </div>
+            <p class="ticket-desc">{{ ticket.description }}</p>
+            <p class="ticket-date text-muted" style="font-size:11px; margin-top:8px;">
+              Submitted: {{ ticket.createdAt | date:'dd MMM yyyy, HH:mm' }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

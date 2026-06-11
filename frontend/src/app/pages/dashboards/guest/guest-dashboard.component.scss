@@ -1,0 +1,269 @@
+.guest-welcome {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 32px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent-amber);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.welcome-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-amber);
+  margin-bottom: 8px;
+}
+
+.welcome-name {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.welcome-room {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+
+  .room-highlight {
+    color: var(--accent-pine);
+    font-weight: 600;
+    font-family: var(--font-heading);
+    font-size: 17px;
+  }
+}
+
+.welcome-room-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.room-card-number {
+  font-family: var(--font-heading);
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--accent-pine);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.room-card-category {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.room-card-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.room-card-price {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-amber);
+  margin-bottom: 12px;
+
+  span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    font-family: var(--font-ui);
+  }
+}
+
+.room-card-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.amenity-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}
+
+/* ── Quick Actions ─────────────────────────────────────────── */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.quick-action-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+
+  &:hover {
+    border-color: var(--accent-pine);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .qa-icon { font-size: 28px; }
+
+  .qa-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+  }
+
+  .qa-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+  }
+
+  &.quick-action-info { cursor: default; }
+}
+
+/* ── Ticket Form Panel ─────────────────────────────────────── */
+.ticket-form-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-amber);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-card);
+  animation: slide-up-modal 0.2s ease;
+}
+
+.panel-title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent-pine);
+  margin-bottom: 20px;
+}
+
+.ticket-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  .form-group--full {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Tickets List ──────────────────────────────────────────── */
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ticket-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ticket-room {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ticket-category {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.ticket-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.ticket-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-family: var(--font-body);
+}
+
+/* ── Empty State ──────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+
+  .empty-icon {
+    font-size: 36px;
+    color: var(--success);
+    margin-bottom: 12px;
+  }
+
+  .empty-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-style: italic;
+  }
+}

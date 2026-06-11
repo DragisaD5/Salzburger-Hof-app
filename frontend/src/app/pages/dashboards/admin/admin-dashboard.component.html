@@ -1,0 +1,496 @@
+<div class="dashboard-layout">
+
+  <!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
+  <header class="dashboard-header">
+    <div class="dashboard-logo">
+      <span class="logo-icon">👑</span>
+      <div class="logo-text">
+        <span class="logo-name">Aurum Palace</span>
+        <span class="logo-sub">General Manager Portal</span>
+      </div>
+    </div>
+    <div class="dashboard-user">
+      <div class="user-info">
+        <span class="user-name">{{ user?.displayName || user?.username }}</span>
+        <span class="role-pill role-admin">👑 Administrator</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="logout()">Sign Out →</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════ MAIN CONTENT ═══════════════════════════════════════ -->
+  <main class="dashboard-content admin-content">
+
+    <!-- Page Title Row -->
+    <div class="admin-page-title-row">
+      <div>
+        <h1 class="admin-page-title">Command Center</h1>
+        <p class="admin-page-subtitle">Full property overview — rooms, staff, bookings & operations</p>
+      </div>
+      <div class="admin-page-date">
+        <span class="admin-date-label">Today</span>
+        <span class="admin-date-value">{{ today | date:'EEEE, MMMM d, y' }}</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ TABS ═══════════════════════════════════════ -->
+    <div class="tabs admin-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">
+        <span class="tab-icon">📊</span> Overview
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'staff'" (click)="activeTab.set('staff')">
+        <span class="tab-icon">👥</span> Staff Management
+        <span class="tab-count">{{ staff().length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'bookings'" (click)="activeTab.set('bookings')">
+        <span class="tab-icon">📅</span> Bookings
+        <span class="tab-count">{{ bookings().length }}</span>
+      </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════ LOADING ═══════════════════════════════════════ -->
+    @if (loading()) {
+      <div class="loading-center">
+        <div class="spinner"></div>
+        <span class="admin-loading-label">Loading hotel data…</span>
+      </div>
+    } @else {
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB: OVERVIEW
+      ════════════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'overview') {
+        <div class="overview-tab">
+
+          <!-- HERO STAT ROW -->
+          <div class="hero-stat-row">
+
+            <!-- Revenue Card -->
+            <div class="hero-stat-card hero-stat-card--revenue">
+              <div class="hero-stat-bg-icon">💰</div>
+              <div class="hero-stat-content">
+                <div class="hero-stat-label">Total Revenue</div>
+                <div class="hero-stat-value">
+                  ${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}
+                </div>
+                <div class="hero-stat-sub">Confirmed & active bookings</div>
+              </div>
+              <div class="hero-stat-icon">💰</div>
+            </div>
+
+            <!-- Total Rooms -->
+            <div class="hero-stat-card hero-stat-card--rooms">
+              <div class="hero-stat-bg-icon">🏨</div>
+              <div class="hero-stat-content">
+                <div class="hero-stat-label">Total Rooms</div>
+                <div class="hero-stat-value">{{ roomStats()?.total ?? 0 }}</div>
+                <div class="hero-stat-sub">{{ roomStats()?.free ?? 0 }} available now</div>
+              </div>
+              <div class="hero-stat-icon">🏨</div>
+            </div>
+
+            <!-- Active Guests -->
+            <div class="hero-stat-card hero-stat-card--guests">
+              <div class="hero-stat-bg-icon">🧳</div>
+              <div class="hero-stat-content">
+                <div class="hero-stat-label">Active Guests</div>
+                <div class="hero-stat-value">{{ roomStats()?.occupied ?? 0 }}</div>
+                <div class="hero-stat-sub">Currently checked in</div>
+              </div>
+              <div class="hero-stat-icon">🧳</div>
+            </div>
+
+            <!-- Open Tickets -->
+            <div class="hero-stat-card" [class.hero-stat-card--tickets-warn]="(ticketStats()?.urgent ?? 0) > 0" [class.hero-stat-card--tickets-ok]="(ticketStats()?.urgent ?? 0) === 0">
+              <div class="hero-stat-bg-icon">🔧</div>
+              <div class="hero-stat-content">
+                <div class="hero-stat-label">Open Tickets</div>
+                <div class="hero-stat-value">{{ (ticketStats()?.open ?? 0) + (ticketStats()?.inProgress ?? 0) }}</div>
+                <div class="hero-stat-sub">{{ ticketStats()?.urgent ?? 0 }} urgent</div>
+              </div>
+              <div class="hero-stat-icon">🔧</div>
+            </div>
+
+          </div>
+
+          <!-- MAINTENANCE ALERT -->
+          @if ((ticketStats()?.urgent ?? 0) > 0) {
+            <div class="maintenance-alert-card">
+              <span class="maintenance-alert-icon">⚠️</span>
+              <div class="maintenance-alert-body">
+                <strong>{{ ticketStats()?.urgent }} Urgent Maintenance {{ (ticketStats()?.urgent ?? 0) === 1 ? 'Issue' : 'Issues' }}</strong>
+                <span>Immediate attention required. Please dispatch maintenance team.</span>
+              </div>
+              <div class="maintenance-alert-action">
+                <button class="btn btn-danger btn-sm" (click)="activeTab.set('overview')">View Details</button>
+              </div>
+            </div>
+          }
+
+          <!-- ROOM OCCUPANCY BAR -->
+          <div class="occupancy-section">
+            <div class="section-header">
+              <h2>Room Occupancy Breakdown</h2>
+              <span class="occupancy-total">{{ roomStats()?.total ?? 0 }} Total Rooms</span>
+            </div>
+
+            <div class="occupancy-card">
+              <div class="occupancy-bar-track">
+                @if ((roomStats()?.total ?? 0) > 0) {
+                  <div class="occupancy-segment occupancy-segment--occupied"
+                       [style.width.%]="((roomStats()?.occupied ?? 0) / (roomStats()?.total ?? 1)) * 100"
+                       title="Occupied">
+                  </div>
+                  <div class="occupancy-segment occupancy-segment--cleaning"
+                       [style.width.%]="((roomStats()?.cleaning ?? 0) / (roomStats()?.total ?? 1)) * 100"
+                       title="Cleaning">
+                  </div>
+                  <div class="occupancy-segment occupancy-segment--dirty"
+                       [style.width.%]="((roomStats()?.dirty ?? 0) / (roomStats()?.total ?? 1)) * 100"
+                       title="Dirty">
+                  </div>
+                  <div class="occupancy-segment occupancy-segment--free"
+                       [style.width.%]="((roomStats()?.free ?? 0) / (roomStats()?.total ?? 1)) * 100"
+                       title="Free">
+                  </div>
+                }
+              </div>
+
+              <div class="occupancy-legend">
+                <div class="occupancy-legend-item">
+                  <span class="occupancy-legend-dot occupancy-legend-dot--occupied"></span>
+                  <span class="occupancy-legend-label">Occupied</span>
+                  <span class="occupancy-legend-value">{{ roomStats()?.occupied ?? 0 }}</span>
+                  <span class="occupancy-legend-pct">
+                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.occupied ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
+                  </span>
+                </div>
+                <div class="occupancy-legend-item">
+                  <span class="occupancy-legend-dot occupancy-legend-dot--free"></span>
+                  <span class="occupancy-legend-label">Available</span>
+                  <span class="occupancy-legend-value">{{ roomStats()?.free ?? 0 }}</span>
+                  <span class="occupancy-legend-pct">
+                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.free ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
+                  </span>
+                </div>
+                <div class="occupancy-legend-item">
+                  <span class="occupancy-legend-dot occupancy-legend-dot--cleaning"></span>
+                  <span class="occupancy-legend-label">Cleaning</span>
+                  <span class="occupancy-legend-value">{{ roomStats()?.cleaning ?? 0 }}</span>
+                  <span class="occupancy-legend-pct">
+                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.cleaning ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
+                  </span>
+                </div>
+                <div class="occupancy-legend-item">
+                  <span class="occupancy-legend-dot occupancy-legend-dot--dirty"></span>
+                  <span class="occupancy-legend-label">Dirty</span>
+                  <span class="occupancy-legend-value">{{ roomStats()?.dirty ?? 0 }}</span>
+                  <span class="occupancy-legend-pct">
+                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.dirty ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
+                  </span>
+                </div>
+                @if ((roomStats()?.vip ?? 0) > 0) {
+                  <div class="occupancy-legend-item">
+                    <span class="occupancy-legend-dot occupancy-legend-dot--vip"></span>
+                    <span class="occupancy-legend-label">VIP</span>
+                    <span class="occupancy-legend-value">{{ roomStats()?.vip ?? 0 }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- TWO COLUMN LOWER SECTION -->
+          <div class="overview-two-col">
+
+            <!-- Left: Recent Bookings -->
+            <div class="overview-panel">
+              <div class="section-header">
+                <h2>Recent Bookings</h2>
+                <button class="btn btn-ghost btn-sm" (click)="activeTab.set('bookings')">View All →</button>
+              </div>
+              <div class="mini-bookings-table">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Guest</th>
+                      <th>Room</th>
+                      <th>Check-In</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (booking of bookings().slice(0, 5); track booking._id) {
+                      <tr>
+                        <td>
+                          <div class="mini-guest-name">{{ booking.guestName }}</div>
+                          <div class="mini-guest-type">{{ booking.roomType }}</div>
+                        </td>
+                        <td>
+                          <span class="mini-room-num">{{ booking.roomNumber }}</span>
+                        </td>
+                        <td>
+                          <span class="mini-date">{{ booking.checkIn | date:'MMM d' }}</span>
+                        </td>
+                        <td>
+                          <span class="badge" [ngClass]="getBookingBadge(booking.status)">{{ booking.status }}</span>
+                        </td>
+                      </tr>
+                    }
+                    @if (bookings().length === 0) {
+                      <tr>
+                        <td colspan="4" class="empty-table-cell">No bookings found</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right: Staff on Duty -->
+            <div class="overview-panel">
+              <div class="section-header">
+                <h2>Staff on Duty</h2>
+                <button class="btn btn-ghost btn-sm" (click)="activeTab.set('staff')">Manage →</button>
+              </div>
+              <div class="staff-duty-list">
+                @for (member of staff(); track member._id) {
+                  <div class="staff-duty-item">
+                    <div class="staff-duty-avatar" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
+                      {{ member.displayName?.charAt(0)?.toUpperCase() || member.username?.charAt(0)?.toUpperCase() }}
+                    </div>
+                    <div class="staff-duty-info">
+                      <span class="staff-duty-name">{{ member.displayName || member.username }}</span>
+                      <span class="staff-duty-role">{{ getRoleIcon(member.role) }} {{ member.role }}</span>
+                    </div>
+                    <div class="staff-duty-login">
+                      @if (member.lastLogin) {
+                        <span class="staff-duty-login-label">{{ member.lastLogin | date:'HH:mm' }}</span>
+                      } @else {
+                        <span class="staff-duty-login-never">Never</span>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (staff().length === 0) {
+                  <div class="empty-duty-list">No staff members found</div>
+                }
+              </div>
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB: STAFF
+      ════════════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'staff') {
+        <div class="staff-tab">
+
+          <!-- Staff Tab Header -->
+          <div class="staff-tab-header">
+            <div>
+              <h2 class="staff-tab-title">Staff Management</h2>
+              <p class="staff-tab-sub">{{ staff().length }} team members across all roles</p>
+            </div>
+            <button class="btn btn-amber" (click)="showCreateStaff.set(!showCreateStaff())">
+              {{ showCreateStaff() ? '✕ Cancel' : '+ Add Staff Member' }}
+            </button>
+          </div>
+
+          <!-- Create Staff Form (Collapsible) -->
+          @if (showCreateStaff()) {
+            <div class="create-staff-form-card">
+              <div class="create-staff-form-header">
+                <span class="create-staff-form-icon">👤</span>
+                <h3 class="create-staff-form-title">New Staff Member</h3>
+              </div>
+              <div class="create-staff-form-grid">
+                <div class="form-group">
+                  <label class="form-label">Display Name</label>
+                  <input class="form-input" type="text" [(ngModel)]="newStaff.displayName" placeholder="e.g. Maria Santos" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <input class="form-input" type="text" [(ngModel)]="newStaff.username" placeholder="e.g. maria.santos" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input class="form-input" type="password" [(ngModel)]="newStaff.password" placeholder="Minimum 8 characters" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Role</label>
+                  <select class="form-input" [(ngModel)]="newStaff.role">
+                    <option value="">Select a role…</option>
+                    @for (role of roles; track role) {
+                      <option [value]="role">{{ role }}</option>
+                    }
+                  </select>
+                </div>
+                @if (newStaff.role === 'Guest') {
+                  <div class="form-group">
+                    <label class="form-label">Room Number</label>
+                    <input class="form-input" type="text" [(ngModel)]="newStaff.roomNumber" placeholder="e.g. 214" />
+                  </div>
+                }
+              </div>
+              <div class="create-staff-form-actions">
+                <button class="btn btn-outline" (click)="showCreateStaff.set(false)">Cancel</button>
+                <button class="btn btn-primary" (click)="createStaff()">✓ Create Staff Member</button>
+              </div>
+            </div>
+          }
+
+          <!-- Staff grouped by Role -->
+          @for (role of roleKeys(); track role) {
+            <div class="staff-role-section">
+              <div class="staff-role-header">
+                <div class="staff-role-title-row">
+                  <span class="staff-role-icon-lg">{{ getRoleIcon(role) }}</span>
+                  <h3 class="staff-role-name">{{ role }}</h3>
+                  <span class="staff-role-count">{{ staffByRole()[role]?.length ?? 0 }} members</span>
+                </div>
+              </div>
+
+              <div class="staff-cards-grid">
+                @for (member of staffByRole()[role]; track member._id) {
+                  <div class="staff-member-card">
+                    <!-- Avatar -->
+                    <div class="staff-avatar-lg" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
+                      {{ member.displayName?.charAt(0)?.toUpperCase() || member.username?.charAt(0)?.toUpperCase() }}
+                    </div>
+
+                    <!-- Info -->
+                    <div class="staff-member-info">
+                      <span class="staff-member-name">{{ member.displayName || member.username }}</span>
+                      <span class="staff-member-username">{{ '@' + member.username }}</span>
+                      @if (member.roomNumber) {
+                        <span class="staff-member-room">🏨 Room {{ member.roomNumber }}</span>
+                      }
+                    </div>
+
+                    <!-- Role badge -->
+                    <div class="staff-member-meta">
+                      <span class="staff-role-badge" [attr.data-role]="member.role">
+                        {{ getRoleIcon(member.role) }} {{ member.role }}
+                      </span>
+                      <div class="staff-last-login">
+                        <span class="staff-last-login-label">Last login</span>
+                        @if (member.lastLogin) {
+                          <span class="staff-last-login-time">{{ member.lastLogin | date:'MMM d, HH:mm' }}</span>
+                        } @else {
+                          <span class="staff-last-login-never">Never logged in</span>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Delete -->
+                    <button class="btn btn-danger btn-sm staff-delete-btn" (click)="deleteStaff(member)">
+                      🗑 Remove
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (staff().length === 0) {
+            <div class="empty-state-admin">
+              <div class="empty-state-icon">👥</div>
+              <h3>No Staff Members</h3>
+              <p>Add your first staff member using the button above.</p>
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB: BOOKINGS
+      ════════════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'bookings') {
+        <div class="bookings-tab">
+
+          <div class="bookings-tab-header">
+            <div>
+              <h2 class="bookings-tab-title">All Bookings</h2>
+              <p class="bookings-tab-sub">Complete reservation record — {{ bookings().length }} total bookings</p>
+            </div>
+            <div class="bookings-revenue-total">
+              <span class="bookings-revenue-label">Total Revenue</span>
+              <span class="bookings-revenue-value">${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}</span>
+            </div>
+          </div>
+
+          @if (bookings().length === 0) {
+            <div class="empty-state-admin">
+              <div class="empty-state-icon">📅</div>
+              <h3>No Bookings Yet</h3>
+              <p>Reservations will appear here once guests book rooms.</p>
+            </div>
+          } @else {
+            <div class="bookings-table-wrapper">
+              <table class="data-table bookings-table">
+                <thead>
+                  <tr>
+                    <th>Guest</th>
+                    <th>Room</th>
+                    <th>Type</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Source</th>
+                    <th>Revenue</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (booking of bookings(); track booking._id) {
+                    <tr class="booking-row">
+                      <td>
+                        <div class="booking-guest-name">{{ booking.guestName }}</div>
+                        <div class="booking-guest-email">{{ booking.guestEmail }}</div>
+                      </td>
+                      <td>
+                        <span class="booking-room-num">{{ booking.roomNumber }}</span>
+                      </td>
+                      <td>
+                        <span class="booking-room-type">{{ booking.roomType }}</span>
+                      </td>
+                      <td>
+                        <span class="booking-date">{{ booking.checkIn | date:'MMM d, y' }}</span>
+                      </td>
+                      <td>
+                        <span class="booking-date">{{ booking.checkOut | date:'MMM d, y' }}</span>
+                      </td>
+                      <td>
+                        <span class="booking-source">{{ booking.source }}</span>
+                      </td>
+                      <td>
+                        <span class="booking-price">${{ booking.totalPrice | number:'1.0-0' }}</span>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getBookingBadge(booking.status)">{{ booking.status }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+        </div>
+      }
+
+    }
+  </main>
+
+  <!-- ═══════════════════════════════════════ TOAST ═══════════════════════════════════════ -->
+  @if (toast()) {
+    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
+      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
+      {{ toast() }}
+    </div>
+  }
+
+</div>

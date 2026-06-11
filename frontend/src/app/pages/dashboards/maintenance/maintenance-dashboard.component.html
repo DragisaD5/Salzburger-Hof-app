@@ -1,0 +1,257 @@
+<div class="dashboard-layout">
+
+  <!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
+  <header class="dashboard-header">
+    <div class="dashboard-logo">
+      <span class="logo-icon">🔧</span>
+      <div class="logo-text">
+        <span class="logo-name">Aurum Palace</span>
+        <span class="logo-sub">Maintenance Control</span>
+      </div>
+    </div>
+    <div class="dashboard-user">
+      <div class="user-info">
+        <span class="user-name">{{ user?.displayName || user?.username }}</span>
+        <span class="role-pill role-maintenance">⚙️ Maintenance</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="logout()">Sign Out →</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════ URGENT ALERT BANNER ═══════════════════════════════════════ -->
+  @if (urgentTickets().length > 0) {
+    <div class="urgent-alert-banner">
+      <div class="urgent-alert-inner">
+        <span class="urgent-pulse-dot"></span>
+        <span class="urgent-icon">🚨</span>
+        <span class="urgent-text">
+          <strong>{{ urgentTickets().length }} URGENT {{ urgentTickets().length === 1 ? 'ISSUE' : 'ISSUES' }} REQUIRE IMMEDIATE ATTENTION</strong>
+          <span class="urgent-sub">Scroll down to view and resolve critical maintenance tickets</span>
+        </span>
+        <span class="urgent-count-badge">{{ urgentTickets().length }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════ MAIN CONTENT ═══════════════════════════════════════ -->
+  <main class="dashboard-content maintenance-content">
+
+    <!-- Page Title -->
+    <div class="page-title-row">
+      <div>
+        <h1 class="page-title">Maintenance Operations</h1>
+        <p class="page-subtitle">Track, manage, and resolve property maintenance tickets</p>
+      </div>
+      <div class="title-meta">
+        <span class="live-indicator">
+          <span class="live-dot"></span>
+          Live Dashboard
+        </span>
+      </div>
+    </div>
+
+    <!-- ═══════════ LOADING ═══════════ -->
+    @if (loading()) {
+      <div class="loading-center">
+        <div class="spinner"></div>
+        <span class="loading-label">Loading maintenance data…</span>
+      </div>
+    } @else {
+
+      <!-- ═══════════════════════════════════════ STAT CARDS ═══════════════════════════════════════ -->
+      <div class="stat-grid maintenance-stat-grid">
+
+        <div class="stat-card stat-card--urgent">
+          <div class="stat-card-inner">
+            <div class="stat-card-icon">🚨</div>
+            <div class="stat-card-body">
+              <div class="stat-number">{{ stats()?.urgent ?? 0 }}</div>
+              <div class="stat-label">Urgent</div>
+            </div>
+          </div>
+          <div class="stat-card-bar stat-card-bar--urgent"></div>
+          @if ((stats()?.urgent ?? 0) > 0) {
+            <div class="stat-card-pulse-ring"></div>
+          }
+        </div>
+
+        <div class="stat-card stat-card--open">
+          <div class="stat-card-inner">
+            <div class="stat-card-icon">📋</div>
+            <div class="stat-card-body">
+              <div class="stat-number">{{ stats()?.open ?? 0 }}</div>
+              <div class="stat-label">Open</div>
+            </div>
+          </div>
+          <div class="stat-card-bar stat-card-bar--open"></div>
+        </div>
+
+        <div class="stat-card stat-card--progress">
+          <div class="stat-card-inner">
+            <div class="stat-card-icon">🔨</div>
+            <div class="stat-card-body">
+              <div class="stat-number">{{ stats()?.inProgress ?? 0 }}</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+          </div>
+          <div class="stat-card-bar stat-card-bar--progress"></div>
+        </div>
+
+        <div class="stat-card stat-card--resolved">
+          <div class="stat-card-inner">
+            <div class="stat-card-icon">✅</div>
+            <div class="stat-card-body">
+              <div class="stat-number">{{ stats()?.resolved ?? 0 }}</div>
+              <div class="stat-label">Resolved</div>
+            </div>
+          </div>
+          <div class="stat-card-bar stat-card-bar--resolved"></div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════ FILTER BAR ═══════════════════════════════════════ -->
+      <div class="filter-bar">
+        <div class="filter-label">Filter by Status</div>
+        <div class="filter-pills">
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="statusFilter() === ''"
+            (click)="statusFilter.set('')">
+            <span class="filter-pill-dot filter-pill-dot--all"></span>
+            All Tickets
+            <span class="filter-pill-count">{{ tickets().length }}</span>
+          </button>
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="statusFilter() === 'Open'"
+            (click)="statusFilter.set('Open')">
+            <span class="filter-pill-dot filter-pill-dot--open"></span>
+            Open
+            <span class="filter-pill-count">{{ stats()?.open ?? 0 }}</span>
+          </button>
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="statusFilter() === 'In Progress'"
+            (click)="statusFilter.set('In Progress')">
+            <span class="filter-pill-dot filter-pill-dot--progress"></span>
+            In Progress
+            <span class="filter-pill-count">{{ stats()?.inProgress ?? 0 }}</span>
+          </button>
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="statusFilter() === 'Resolved'"
+            (click)="statusFilter.set('Resolved')">
+            <span class="filter-pill-dot filter-pill-dot--resolved"></span>
+            Resolved
+            <span class="filter-pill-count">{{ stats()?.resolved ?? 0 }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════ TICKET GRID ═══════════════════════════════════════ -->
+      <div class="section-header">
+        <h2>{{ statusFilter() || 'All' }} Maintenance Tickets</h2>
+        <span class="ticket-count-label">{{ filteredTickets().length }} {{ filteredTickets().length === 1 ? 'ticket' : 'tickets' }}</span>
+      </div>
+
+      @if (filteredTickets().length === 0) {
+        <div class="empty-state">
+          <div class="empty-state-icon">🎉</div>
+          <h3 class="empty-state-title">No Tickets Found</h3>
+          <p class="empty-state-desc">
+            @if (statusFilter()) {
+              There are no {{ statusFilter().toLowerCase() }} maintenance tickets at this time.
+            } @else {
+              The property is running smoothly — no maintenance tickets to display.
+            }
+          </p>
+        </div>
+      } @else {
+        <div class="ticket-cards-grid">
+          @for (ticket of filteredTickets(); track ticket._id) {
+            <div class="ticket-card-premium"
+                 [class.ticket-card-premium--urgent]="ticket.priority === 'URGENT'"
+                 [class.ticket-card-premium--resolved]="ticket.status === 'Resolved'">
+
+              <!-- Priority Stripe -->
+              <div class="ticket-stripe"
+                   [class.ticket-stripe--urgent]="ticket.priority === 'URGENT'"
+                   [class.ticket-stripe--high]="ticket.priority === 'High'"
+                   [class.ticket-stripe--low]="ticket.priority === 'Low'">
+              </div>
+
+              <!-- Card Content -->
+              <div class="ticket-card-content">
+
+                <!-- Top Row: Badges -->
+                <div class="ticket-card-header">
+                  <div class="ticket-badges">
+                    <span class="ticket-room-badge">🏨 Room {{ ticket.roomNumber }}</span>
+                    <span class="ticket-category-tag">{{ ticket.category }}</span>
+                    <span class="badge" [ngClass]="getPriorityClass(ticket.priority)">
+                      @if (ticket.priority === 'URGENT') { 🔴 }
+                      @else if (ticket.priority === 'High') { 🟠 }
+                      @else { 🟡 }
+                      {{ ticket.priority }}
+                    </span>
+                    <span class="badge" [ngClass]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+                  </div>
+                  @if (ticket.priority === 'URGENT' && ticket.status !== 'Resolved') {
+                    <span class="urgent-flame">🔥</span>
+                  }
+                </div>
+
+                <!-- Description -->
+                <p class="ticket-description">{{ ticket.description }}</p>
+
+                <!-- Bottom Row: Meta + Action -->
+                <div class="ticket-card-footer">
+                  <div class="ticket-meta">
+                    <span class="ticket-meta-item">
+                      <span class="ticket-meta-icon">🕐</span>
+                      {{ ticket.createdAt | date:'MMM d, y · HH:mm' }}
+                    </span>
+                    <span class="ticket-meta-item">
+                      <span class="ticket-meta-icon">👤</span>
+                      {{ ticket.reportedBy }}
+                    </span>
+                  </div>
+
+                  <div class="ticket-action">
+                    @if (ticket.status !== 'Resolved') {
+                      <button class="btn btn-sm btn-resolve"
+                              [class.btn-resolve--urgent]="ticket.priority === 'URGENT'"
+                              (click)="resolveTicket(ticket)">
+                        ✓ Resolve
+                      </button>
+                    } @else {
+                      <div class="resolved-stamp">
+                        <span class="resolved-stamp-icon">✅</span>
+                        <span class="resolved-stamp-text">RESOLVED</span>
+                        @if (ticket.resolvedAt) {
+                          <span class="resolved-stamp-date">{{ ticket.resolvedAt | date:'MMM d' }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </main>
+
+  <!-- ═══════════════════════════════════════ TOAST ═══════════════════════════════════════ -->
+  @if (toast()) {
+    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
+      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
+      {{ toast() }}
+    </div>
+  }
+
+</div>

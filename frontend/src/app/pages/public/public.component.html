@@ -1,0 +1,541 @@
+﻿<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav class="public-nav" [class.nav-scrolled]="isScrolled">
+  <div class="nav-brand">
+    <span class="nav-logo-text">Salzburger Hof</span>
+    <span class="nav-logo-star">✦</span>
+    <span class="nav-tagline">SINCE 1887</span>
+  </div>
+  <div class="nav-links">
+    <a href="#wellness">Wellness</a>
+    <a href="#dining">Dining</a>
+    <a href="#bar">Ritz Bar</a>
+    <a href="#ski">Ski</a>
+    <a href="#rooms">Rooms</a>
+    <a href="#booking-widget">Reserve</a>
+    <button class="btn btn-outline btn-sm" id="staff-login-btn" (click)="goToLogin()">Staff Login</button>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<section class="hero" id="hero">
+  <!-- Real Hotel Salzburger Hof exterior photo -->
+  <div class="hero-photo-bg">
+    <img
+      src="Hotel.jpg"
+      alt="Hotel Salzburger Hof Bad Gastein"
+      class="hero-bg-img"
+    />
+    <div class="hero-bg-gradient-subtle"></div>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">SALZBURG, AUSTRIA ✦ EST. 1887</p>
+    <h1 class="hero-headline heading-display">
+      Alpine<br/>
+      <span class="headline-accent">Warmth.</span>
+    </h1>
+    <p class="hero-subtext">
+      Where ancient Alpine traditions meet five-star refinement.
+      Cosy, timeless and unapologetically serene.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" id="hero-reserve-btn" (click)="scrollToBooking()">
+        Reserve Your Suite
+      </button>
+      <button class="btn btn-ghost-light" (click)="goToLogin()">
+        Staff Portal →
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><span>105</span><p>ROOMS & SUITES</p></div>
+      <div class="hero-stat-div">|</div>
+      <div class="hero-stat"><span>5★</span><p>ALPINE LUXURY</p></div>
+      <div class="hero-stat-div">|</div>
+      <div class="hero-stat"><span>1887</span><p>ESTABLISHED</p></div>
+      <div class="hero-stat-div">|</div>
+      <div class="hero-stat"><span>250km</span><p>SKI PISTES</p></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── BOOKING WIDGET ─────────────────────────────────────── -->
+<div class="booking-widget-wrap" id="booking-widget">
+  <div class="booking-widget-card">
+    <div class="booking-widget-header">
+      <div class="booking-widget-title">
+        <span class="booking-widget-icon">✦</span>
+        <div>
+          <h3>Reserve Your Stay</h3>
+          <p>Best rate guaranteed — instant confirmation</p>
+        </div>
+      </div>
+      <div class="booking-price-preview">
+        <span class="booking-price-from">from</span>
+        <span class="booking-price-amount">€160</span>
+        <span class="booking-price-night">/night</span>
+      </div>
+    </div>
+
+    <div class="booking-widget-divider"></div>
+
+    @if (bookingSuccess()) {
+      <div class="booking-success">
+        <span class="success-icon">✓</span>
+        <div>
+          <p class="success-title">RESERVATION SUBMITTED</p>
+          <p class="success-sub">Our team will confirm within 2 hours. Check your email.</p>
+        </div>
+      </div>
+    } @else {
+      <div class="booking-fields">
+        <div class="booking-field booking-field--wide">
+          <label>FULL NAME</label>
+          <input class="booking-input" type="text" [(ngModel)]="bookingForm.guestName" name="guestName" placeholder="e.g. Maria Müller"/>
+        </div>
+        <div class="booking-field booking-field--wide">
+          <label>EMAIL ADDRESS</label>
+          <input class="booking-input" type="email" [(ngModel)]="bookingForm.guestEmail" name="guestEmail" placeholder="email@example.com"/>
+        </div>
+        <div class="booking-field">
+          <label>CHECK-IN</label>
+          <input class="booking-input" type="date" [(ngModel)]="bookingForm.checkIn" name="checkIn"/>
+        </div>
+        <div class="booking-field">
+          <label>CHECK-OUT</label>
+          <input class="booking-input" type="date" [(ngModel)]="bookingForm.checkOut" name="checkOut"/>
+        </div>
+        <div class="booking-field">
+          <label>ROOM TYPE</label>
+          <select class="booking-input" [(ngModel)]="bookingForm.roomType" name="roomType">
+            @for (type of roomTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="booking-widget-footer">
+        @if (bookingError()) {
+          <p class="booking-err">{{ bookingError() }}</p>
+        }
+        <div class="booking-footer-info">
+          <span class="booking-badge">🔒 Secure booking</span>
+          <span class="booking-badge">✓ Free cancellation</span>
+          <span class="booking-badge">✦ Best rate</span>
+        </div>
+        <button id="booking-submit-btn" class="btn btn-primary booking-btn" (click)="submitBooking()" [disabled]="bookingLoading()">
+          @if (bookingLoading()) { <span class="spinner"></span> } @else { Reserve Now }
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ── FLYING STATS ──────────────────────────────────────────── -->
+<section class="stats-section reveal">
+  <div class="stats-grid">
+
+    <div class="stat-card stat-card--pine">
+      <div class="stat-card-bg-num">105</div>
+      <div class="stat-card-content">
+        <div class="stat-card-icon">◻</div>
+        <div class="stat-counter" data-target="105">0</div>
+        <div class="stat-card-label">Rooms & Suites</div>
+        <p class="stat-card-desc">From cosy Standard to grand Penthouse — every room faces the Alps.</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--amber">
+      <div class="stat-card-bg-num">1887</div>
+      <div class="stat-card-content">
+        <div class="stat-card-icon">◆</div>
+        <div class="stat-counter" data-target="1887">0</div>
+        <div class="stat-card-label">Year Founded</div>
+        <p class="stat-card-desc">Over 135 years of Austrian alpine hospitality tradition.</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--dark">
+      <div class="stat-card-bg-num">250</div>
+      <div class="stat-card-content">
+        <div class="stat-card-icon">❄</div>
+        <div class="stat-counter" data-target="250">0</div>
+        <div class="stat-card-label">km of Pistes</div>
+        <p class="stat-card-desc">Direct access to Gasteinertal — 45+ lifts, 3,029m peak.</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--cream">
+      <div class="stat-card-bg-num">2400</div>
+      <div class="stat-card-content">
+        <div class="stat-card-icon">♨</div>
+        <div class="stat-counter" data-target="2400">0</div>
+        <div class="stat-card-label">m² of Wellness</div>
+        <p class="stat-card-desc">Thermal pools, hammam, saunas & 12 private treatment suites.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── MARQUEE ─────────────────────────────────────────────── -->
+<div class="marquee-wrapper">
+  <div class="marquee-track">
+    <span class="marquee-text">— Experience Alpine Warmth —</span>
+    <span class="marquee-text">Timeless Austrian Hospitality —</span>
+    <span class="marquee-text">Wellness Schlössl —</span>
+    <span class="marquee-text">Elite Ski Access —</span>
+    <span class="marquee-text">Ritz Bar & Live Music —</span>
+    <span class="marquee-text">Gasteinertal Ski Resort —</span>
+    <span class="marquee-text">— Experience Alpine Warmth —</span>
+    <span class="marquee-text">Timeless Austrian Hospitality —</span>
+    <span class="marquee-text">Wellness Schlössl —</span>
+    <span class="marquee-text">Elite Ski Access —</span>
+    <span class="marquee-text">Ritz Bar & Live Music —</span>
+    <span class="marquee-text">Gasteinertal Ski Resort —</span>
+  </div>
+</div>
+
+<!-- ── WELLNESS SCHLÖSSL ─────────────────────────────────── -->
+<section class="scene-section scene-section--teal" id="wellness">
+  <div class="scene-bg">
+    <img src="SPA.jpg" alt="Salzburger Hof Thermal Pool" loading="lazy"/>
+    <div class="scene-overlay scene-overlay--teal"></div>
+  </div>
+  <div class="scene-content reveal">
+    <div class="section-eyebrow scene-eyebrow">THE SPA</div>
+    <h2 class="scene-headline heading-display">
+      Wellness<br/><span class="scene-accent">Schlössl.</span>
+    </h2>
+    <p class="scene-body">
+      Surrender to 2,400 m² of alpine thermal bliss. Indoor pool with floor-to-ceiling
+      glass panoramas, ancient steam ritual baths, and treatment suites wrapped in pine and candlelight.
+    </p>
+    <div class="scene-highlights">
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">♨</span>
+        <div><strong>Thermal Indoor Pool</strong><p>6th floor — full alpine panorama</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">✦</span>
+        <div><strong>Steam & Sauna Complex</strong><p>Hammam, Finnish & brine steam rooms</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">✿</span>
+        <div><strong>Private Treatment Suites</strong><p>Massages, wraps & beauty rituals</p></div>
+      </div>
+    </div>
+    <button class="btn btn-scene" (click)="scrollToBooking()">Book Your Spa Retreat</button>
+  </div>
+</section>
+
+<div class="marquee-wrapper marquee-wrapper--stone">
+  <div class="marquee-track">
+    <span class="marquee-text">— Wellness Schlössl —</span>
+    <span class="marquee-text">2,400 m² of Alpine Bliss —</span>
+    <span class="marquee-text">Thermal Pool —</span>
+    <span class="marquee-text">Hammam & Steam —</span>
+    <span class="marquee-text">Private Treatment Suites —</span>
+    <span class="marquee-text">— Wellness Schlössl —</span>
+    <span class="marquee-text">2,400 m² of Alpine Bliss —</span>
+    <span class="marquee-text">Thermal Pool —</span>
+    <span class="marquee-text">Hammam & Steam —</span>
+    <span class="marquee-text">Private Treatment Suites —</span>
+  </div>
+</div>
+
+<!-- ── PHOTO STRIP ─────────────────────────────────────────── -->
+<div class="photo-strip">
+  <div class="photo-strip-item">
+    <img src="Hotel.jpg" alt="Hotel Salzburger Hof Exterior" loading="lazy"/>
+    <div class="photo-strip-label">THE HOTEL</div>
+  </div>
+  <div class="photo-strip-item">
+    <img src="Room4" alt="Suite with Chandelier" loading="lazy"/>
+    <div class="photo-strip-label">SUITE</div>
+  </div>
+  <div class="photo-strip-item">
+    <img src="SPA.jpg" alt="Indoor Pool" loading="lazy"/>
+    <div class="photo-strip-label">THERMAL POOL</div>
+  </div>
+  <div class="photo-strip-item">
+    <img src="Balcony.jpg" alt="Rooftop Sun Terrace" loading="lazy"/>
+    <div class="photo-strip-label">SUN TERRACE</div>
+  </div>
+  <div class="photo-strip-item">
+    <img src="SPA2.jpg" alt="Spa Loungers" loading="lazy"/>
+    <div class="photo-strip-label">WELLNESS</div>
+  </div>
+</div>
+
+<div class="marquee-wrapper">
+  <div class="marquee-track marquee-track--reverse">
+    <span class="marquee-text">— Alpine Dining —</span>
+    <span class="marquee-text">Ritz Restaurant —</span>
+    <span class="marquee-text">Hofkeller Fondue Evenings —</span>
+    <span class="marquee-text">800-Label Wine Cellar —</span>
+    <span class="marquee-text">Jagdstube Après-Ski —</span>
+    <span class="marquee-text">— Alpine Dining —</span>
+    <span class="marquee-text">Ritz Restaurant —</span>
+    <span class="marquee-text">Hofkeller Fondue Evenings —</span>
+    <span class="marquee-text">800-Label Wine Cellar —</span>
+    <span class="marquee-text">Jagdstube Après-Ski —</span>
+  </div>
+</div>
+
+<!-- ── ALPINE DINING ──────────────────────────────────────── -->
+<section class="scene-section scene-section--right scene-section--warm" id="dining">
+  <div class="scene-bg">
+    <img src="Balcony.jpg" alt="Salzburger Hof Rooftop Terrace" loading="lazy"/>
+    <div class="scene-overlay scene-overlay--warm"></div>
+  </div>
+  <div class="scene-content reveal">
+    <div class="section-eyebrow scene-eyebrow">GASTRONOMY</div>
+    <h2 class="scene-headline heading-display">
+      Alpine<br/><span class="scene-accent">Dining.</span>
+    </h2>
+    <p class="scene-body">
+      Four distinct venues reimagine Austrian cuisine with hyper-seasonal mountain produce.
+      From the elegant Ritz Restaurant to the Hofkeller’s legendary fondue evenings — every meal is a journey.
+    </p>
+    <div class="scene-highlights">
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">◈</span>
+        <div><strong>Ritz Restaurant</strong><p>Breakfast & fine alpine dinner</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">◆</span>
+        <div><strong>Hofkeller</strong><p>Fondue, raclette & Steinplatte evenings</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">❧</span>
+        <div><strong>Wine Cellar</strong><p>800-label curated Austrian selection</p></div>
+      </div>
+    </div>
+    <button class="btn btn-scene" (click)="scrollToBooking()">Reserve a Table</button>
+  </div>
+</section>
+
+<div class="marquee-wrapper marquee-wrapper--stone">
+  <div class="marquee-track">
+    <span class="marquee-text">— The Ritz Bar —</span>
+    <span class="marquee-text">Live Music Nightly —</span>
+    <span class="marquee-text">Craft Cocktails —</span>
+    <span class="marquee-text">Fireplace Lounge —</span>
+    <span class="marquee-text">Open from 6pm —</span>
+    <span class="marquee-text">— The Ritz Bar —</span>
+    <span class="marquee-text">Live Music Nightly —</span>
+    <span class="marquee-text">Craft Cocktails —</span>
+    <span class="marquee-text">Fireplace Lounge —</span>
+    <span class="marquee-text">Open from 6pm —</span>
+  </div>
+</div>
+
+<!-- ── RITZ BAR ────────────────────────────────────────────── -->
+<section class="bar-section" id="bar">
+  <div class="bar-bg">
+    <img
+      src="https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=1400&q=85"
+      alt="Ritz Bar Interior"
+      loading="lazy"
+      onerror="this.style.display='none'"
+    />
+    <div class="bar-overlay"></div>
+  </div>
+  <div class="bar-content reveal">
+    <div class="section-eyebrow bar-eyebrow">THE NIGHTCAP</div>
+    <h2 class="bar-headline heading-display">
+      The<br/>Ritz<br/><span class="text-gold">Bar.</span>
+    </h2>
+    <p class="bar-body">
+      An exclusive cocktail sanctuary alive with resident pianists and live jazz.
+      Crystal glassware, hand-crafted Austrian spirits, and the warm amber glow of a fireplace
+      — the perfect end to a day on the mountain.
+    </p>
+    <div class="bar-highlights">
+      <div class="bar-highlight">
+        <span class="bar-highlight-icon">♫</span>
+        <div>
+          <strong>Live Music Nightly</strong>
+          <p>Resident pianist & touring artists</p>
+        </div>
+      </div>
+      <div class="bar-highlight">
+        <span class="bar-highlight-icon">◈</span>
+        <div>
+          <strong>Craft Cocktails</strong>
+          <p>Hand-selected Austrian spirits</p>
+        </div>
+      </div>
+      <div class="bar-highlight">
+        <span class="bar-highlight-icon">✦</span>
+        <div>
+          <strong>Fireplace Lounge</strong>
+          <p>Open from 6pm — après-ski welcome</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-amber" (click)="scrollToBooking()">Reserve a Table</button>
+  </div>
+</section>
+
+<div class="marquee-wrapper">
+  <div class="marquee-track marquee-track--reverse">
+    <span class="marquee-text">— Elite Ski Access —</span>
+    <span class="marquee-text">250 km Gasteinertal —</span>
+    <span class="marquee-text">Stubnerkogelbahn Lift —</span>
+    <span class="marquee-text">3,029m Peak —</span>
+    <span class="marquee-text">Private Mountain Guides —</span>
+    <span class="marquee-text">— Elite Ski Access —</span>
+    <span class="marquee-text">250 km Gasteinertal —</span>
+    <span class="marquee-text">Stubnerkogelbahn Lift —</span>
+    <span class="marquee-text">3,029m Peak —</span>
+    <span class="marquee-text">Private Mountain Guides —</span>
+  </div>
+</div>
+
+<!-- ── ELITE SKI ACCESS ─────────────────────────────────── -->
+<section class="scene-section scene-section--right scene-section--pine" id="ski">
+  <div class="scene-bg">
+    <img src="SKI.jpg" alt="Gastein Stubnerkogel Ski Resort" loading="lazy"/>
+    <div class="scene-overlay scene-overlay--pine"></div>
+  </div>
+  <div class="scene-content reveal">
+    <div class="section-eyebrow scene-eyebrow">THE MOUNTAIN</div>
+    <h2 class="scene-headline heading-display">
+      Elite<br/>Ski<br/><span class="scene-accent">Access.</span>
+    </h2>
+    <p class="scene-body">
+      Steps from the Stubnerkogelbahn lift. 250&nbsp;km of pristine Gasteinertal pistes,
+      peaks reaching 3,029&nbsp;metres — private mountain guides available, zero compromise.
+    </p>
+    <div class="scene-ski-stats">
+      <div class="scene-ski-stat"><span>250</span><p>KM PISTES</p></div>
+      <div class="scene-ski-stat"><span>3,029</span><p>METER PEAK</p></div>
+      <div class="scene-ski-stat"><span>45+</span><p>SKI LIFTS</p></div>
+    </div>
+    <div class="scene-highlights">
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">❄</span>
+        <div><strong>Ski-In Access</strong><p>Steps to Stubnerkogelbahn lift</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">◆</span>
+        <div><strong>Equipment Hire</strong><p>On-site ski & boot rental</p></div>
+      </div>
+      <div class="scene-highlight">
+        <span class="scene-highlight-icon">⛰</span>
+        <div><strong>Private Guides</strong><p>Expert mountain guides on demand</p></div>
+      </div>
+    </div>
+    <button class="btn btn-scene" (click)="scrollToBooking()">Book Ski Package</button>
+  </div>
+</section>
+
+<!-- ── ROOMS TEASER ───────────────────────────────────────── -->
+<section class="rooms-teaser" id="rooms">
+  <div class="rooms-teaser-header reveal">
+    <div class="section-eyebrow">ACCOMMODATION</div>
+    <h2 class="rooms-headline">
+      105 Rooms.<br/><em>Zero Compromises.</em>
+    </h2>
+  </div>
+  <div class="rooms-cards">
+    @for (room of [
+      { name: 'STANDARD', price: '€160', desc: 'Mountain views, Austrian craftsmanship, every comfort. Flat-screen TV, minibar, safe & coffee setup.', img: 'Room3.jpg', icon: '🛏' },
+      { name: 'DELUXE', price: '€280', desc: 'Expanded Alpine suite with crystal chandelier, Nespresso, premium linens and panoramic valley views.', img: 'Room.jpg', icon: '🌄' },
+      { name: 'SUITE', price: '€450', desc: 'Private lounge area, crystal chandelier, butler on demand. Panoramic alpine peaks from your own terrace.', img: 'Room4', icon: '🛁' },
+      { name: 'PENTHOUSE', price: '€850', desc: 'Private terrace. Fireplace. Alpine infinity — all yours. The ultimate mountain retreat.', img: 'Balcony.jpg', icon: '👑' }
+    ]; track room.name) {
+      <div class="room-teaser-card reveal">
+        <div class="room-teaser-photo">
+          <img [src]="room.img" [alt]="room.name + ' room'" loading="lazy"
+               onerror="this.parentElement.classList.add('room-photo-fallback')"/>
+          <div class="room-photo-overlay">
+            <span class="room-photo-icon">{{ room.icon }}</span>
+          </div>
+        </div>
+        <div class="room-teaser-body">
+          <div class="room-teaser-name">{{ room.name }}</div>
+          <div class="room-teaser-price">From {{ room.price }}<span>/night</span></div>
+          <p class="room-teaser-desc">{{ room.desc }}</p>
+          <button class="btn btn-outline btn-sm" (click)="scrollToBooking()">Select Room</button>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ── TRUST BAR ──────────────────────────────────────────── -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <span class="trust-icon">⭐⭐⭐⭐⭐</span>
+    <span class="trust-label">5-Star Rated on Booking.com</span>
+  </div>
+  <div class="trust-div">|</div>
+  <div class="trust-item">
+    <span class="trust-icon">🏆</span>
+    <span class="trust-label">Gault Millau — 3 Toques</span>
+  </div>
+  <div class="trust-div">|</div>
+  <div class="trust-item">
+    <span class="trust-icon">🌿</span>
+    <span class="trust-label">Austrian Eco-Certified</span>
+  </div>
+  <div class="trust-div">|</div>
+  <div class="trust-item">
+    <span class="trust-icon">🎿</span>
+    <span class="trust-label">Best Ski Hotel — Gasteinertal 2024</span>
+  </div>
+</div>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-grid-lines"></div>
+  <div class="cta-photo-accent">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+         alt="Austrian Alps" loading="lazy"
+         onerror="this.style.display='none'"/>
+  </div>
+  <div class="cta-content reveal">
+    <p class="cta-eyebrow">YOUR ALPINE ESCAPE AWAITS</p>
+    <h2 class="cta-headline heading-display">Begin your<br/><span class="text-gold">Alpine Story.</span></h2>
+    <p class="cta-sub">105 rooms. Timeless Alpine warmth. Reserve yours today.</p>
+    <button class="btn btn-primary" id="cta-reserve-btn" (click)="scrollToBooking()">
+      Reserve Now — Experience Everything
+    </button>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="public-footer">
+  <div class="footer-brand">
+    <p class="footer-name">Hotel Salzburger Hof</p>
+    <p class="footer-tagline">Alpine Warmth Since 1887</p>
+    <div class="footer-socials">
+      <a href="https://www.facebook.com/hotel.salzburgerhof" target="_blank" class="footer-social">f</a>
+      <a href="https://www.instagram.com/salzburgerhof/" target="_blank" class="footer-social">ig</a>
+    </div>
+  </div>
+  <div class="footer-links-col">
+    <p class="footer-col-title">EXPERIENCES</p>
+    <a href="#wellness">Wellness Schlössl</a>
+    <a href="#dining">Alpine Dining</a>
+    <a href="#bar">Ritz Bar</a>
+    <a href="#ski">Ski Access</a>
+  </div>
+  <div class="footer-info">
+    <p class="footer-col-title">CONTACT</p>
+    <p>Kaiser-Franz-Josef-Strasse 16</p>
+    <p>5640 Bad Gastein, Austria</p>
+    <p>+43 6434 2037 · info&#64;salzburgerhof.com</p>
+  </div>
+  <div class="footer-right">
+    <button class="btn btn-ghost btn-sm" (click)="goToLogin()">Staff Portal →</button>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 Hotel Salzburger Hof Bad Gastein. All Rights Reserved.</p>
+  </div>
+</footer>

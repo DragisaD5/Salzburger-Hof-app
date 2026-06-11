@@ -1,0 +1,380 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     HOUSEKEEPING DASHBOARD — Alpine Warmth Design System
+     Luxury Hotel Housekeeping Tablet Interface
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="dashboard-layout hk-layout">
+
+  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <header class="dashboard-header">
+    <div class="dashboard-logo">
+      <span class="logo-emblem">🧹</span>
+      <div class="logo-text">
+        <span class="logo-name">Grand Élite</span>
+        <span class="logo-sub">Housekeeping</span>
+      </div>
+    </div>
+
+    <div class="header-center-hk">
+      <div class="shift-info">
+        <span class="shift-dot"></span>
+        <span>Morning Shift · {{ today }}</span>
+      </div>
+    </div>
+
+    <div class="dashboard-user">
+      <div class="user-avatar hk-avatar">
+        <span>{{ user?.displayName?.charAt(0) ?? 'H' }}</span>
+      </div>
+      <div class="user-details">
+        <span class="user-name">{{ user?.displayName ?? 'Housekeeper' }}</span>
+        <span class="role-pill hk-role">🧹 Housekeeping</span>
+      </div>
+      <button class="btn btn-ghost btn-sm logout-btn" (click)="logout()">
+        <span>⎋</span> Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── MAIN CONTENT ────────────────────────────────────────────── -->
+  <main class="dashboard-content hk-content">
+
+    @if (loading()) {
+      <div class="loading-center">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading housekeeping data…</p>
+      </div>
+    } @else {
+
+      <!-- ─── HERO STAT CARDS ──────────────────────────────────────── -->
+      <section class="hk-hero">
+        <div class="stat-grid hk-stats">
+
+          <!-- Needs Attention -->
+          <div class="stat-card hk-stat-card hk-danger">
+            <div class="hk-stat-icon">⚠️</div>
+            <div class="hk-stat-body">
+              <div class="stat-number hk-stat-num danger-num">
+                {{ dirtyAndCleaningRooms.length }}
+              </div>
+              <div class="stat-label hk-stat-label">Needs Attention</div>
+            </div>
+            <div class="hk-stat-sub">
+              {{ dirtyCount }} dirty ·
+              {{ cleaningCount }} in progress
+            </div>
+          </div>
+
+          <!-- In Cleaning -->
+          <div class="stat-card hk-stat-card hk-pine">
+            <div class="hk-stat-icon">🧽</div>
+            <div class="hk-stat-body">
+              <div class="stat-number hk-stat-num pine-num">{{ cleaningCount }}</div>
+              <div class="stat-label hk-stat-label">In Cleaning</div>
+            </div>
+            <div class="hk-stat-sub">Currently being serviced</div>
+          </div>
+
+          <!-- All Clear -->
+          <div class="stat-card hk-stat-card hk-amber">
+            <div class="hk-stat-icon">✅</div>
+            <div class="hk-stat-body">
+              <div class="stat-number hk-stat-num amber-num">{{ cleanRooms.length }}</div>
+              <div class="stat-label hk-stat-label">All Clear</div>
+            </div>
+            <div class="hk-stat-sub">Clean &amp; ready for guests</div>
+          </div>
+
+        </div>
+
+        <!-- Daily progress bar -->
+        <div class="hk-progress-bar-wrap">
+          <div class="hk-progress-label">
+            <span>Daily Completion</span>
+            <span class="hk-progress-pct">
+              {{ rooms().length
+                  ? ((cleanRooms.length / rooms().length) * 100).toFixed(0)
+                  : 0 }}%
+            </span>
+          </div>
+          <div class="hk-progress-track">
+            <div class="hk-progress-fill"
+                 [style.width.%]="rooms().length ? (cleanRooms.length / rooms().length) * 100 : 0">
+            </div>
+          </div>
+          <div class="hk-progress-sub">
+            {{ cleanRooms.length }} of {{ rooms().length }} rooms cleared today
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── PRIORITY QUEUE ───────────────────────────────────────── -->
+      <section class="hk-queue-section">
+        <div class="section-header">
+          <h2>Today's Priority Queue</h2>
+          @if (dirtyAndCleaningRooms.length > 0) {
+            <span class="queue-count-badge">{{ dirtyAndCleaningRooms.length }} pending</span>
+          }
+        </div>
+
+        @if (dirtyAndCleaningRooms.length === 0) {
+          <!-- Beautiful empty state -->
+          <div class="hk-empty-state">
+            <div class="hk-empty-circle">
+              <span class="hk-empty-check">✓</span>
+            </div>
+            <h3 class="hk-empty-title">All rooms are spotless!</h3>
+            <p class="hk-empty-sub">
+              Excellent work — every room is clean and ready for guests.<br/>
+              Enjoy a well-earned break.
+            </p>
+            <div class="hk-empty-stars">⭐⭐⭐⭐⭐</div>
+          </div>
+        } @else {
+          <div class="hk-queue-grid">
+
+            @for (room of dirtyAndCleaningRooms; track room._id) {
+
+              <!-- DIRTY room card — urgent -->
+              @if (room.status === 'Dirty') {
+                <div class="hk-room-card hk-card-dirty">
+                  <div class="hk-card-accent accent-dirty"></div>
+                  <div class="hk-card-top">
+                    <div class="hk-card-left">
+                      <span class="hk-card-number">{{ room.roomNumber }}</span>
+                      @if (room.isVIP) {
+                        <span class="badge badge-vip hk-vip">⭐ VIP</span>
+                      }
+                    </div>
+                    <span class="badge badge-dirty hk-status-badge">Needs Cleaning</span>
+                  </div>
+                  <div class="hk-card-middle">
+                    <span class="hk-card-category">{{ room.category }}</span>
+                    <span class="hk-card-floor">Floor {{ getFloor(room.roomNumber) }}</span>
+                  </div>
+                  <div class="hk-card-urgency">
+                    <span class="urgency-dot"></span>
+                    <span class="urgency-label">Awaiting service</span>
+                  </div>
+                  <button class="btn btn-primary hk-start-btn" (click)="startCleaning(room)">
+                    🧹 Start Cleaning
+                  </button>
+                </div>
+              }
+
+              <!-- CLEANING room card — in progress -->
+              @if (room.status === 'Cleaning') {
+                <div class="hk-room-card hk-card-cleaning">
+                  <div class="hk-card-accent accent-cleaning"></div>
+                  <div class="hk-card-top">
+                    <div class="hk-card-left">
+                      <span class="hk-card-number">{{ room.roomNumber }}</span>
+                      @if (room.isVIP) {
+                        <span class="badge badge-vip hk-vip">⭐ VIP</span>
+                      }
+                    </div>
+                    <span class="badge badge-cleaning hk-status-badge">Cleaning</span>
+                  </div>
+                  <div class="hk-card-middle">
+                    <span class="hk-card-category">{{ room.category }}</span>
+                    <span class="hk-card-floor">Floor {{ getFloor(room.roomNumber) }}</span>
+                  </div>
+                  <div class="hk-inprogress-row">
+                    <span class="progress-pulse"></span>
+                    <span class="progress-label">IN PROGRESS</span>
+                  </div>
+                  <button class="btn btn-outline btn-sm hk-resume-btn" (click)="startCleaning(room)">
+                    ↩ Resume Session
+                  </button>
+                </div>
+              }
+
+            }
+          </div>
+        }
+      </section>
+
+      <!-- ─── CLEAN ROOMS PREVIEW ──────────────────────────────────── -->
+      @if (cleanRooms.length > 0) {
+        <section class="hk-clean-section">
+          <div class="section-header">
+            <h2>Completed Rooms</h2>
+            <span class="hk-clean-count">{{ cleanRooms.length }} rooms clear</span>
+          </div>
+          <div class="hk-clean-grid">
+            @for (room of cleanRooms; track room._id) {
+              <div class="hk-clean-card">
+                <span class="clean-check">✓</span>
+                <span class="clean-number">{{ room.roomNumber }}</span>
+                <span class="clean-category">{{ room.category }}</span>
+                @if (room.isVIP) {
+                  <span class="vip-star">⭐</span>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+    }
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CLEANING SESSION MODAL
+       ═══════════════════════════════════════════════════════════════ -->
+  @if (activeSession()) {
+    <div class="modal-backdrop hk-modal-backdrop" (click)="cancelSession()">
+      <div class="modal hk-modal" (click)="$event.stopPropagation()">
+
+        <!-- Modal Header -->
+        <div class="hk-modal-header">
+          <div class="hk-modal-header-left">
+            <span class="hk-modal-icon">🧹</span>
+            <div>
+              <div class="modal-title hk-modal-title">Cleaning Session</div>
+              <div class="hk-modal-sub">
+                Room {{ activeSession()!.room.roomNumber }} ·
+                {{ activeSession()!.room.category }}
+                @if (activeSession()!.room.isVIP) {
+                  <span class="badge badge-vip ml-4">⭐ VIP</span>
+                }
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm hk-modal-close" (click)="cancelSession()">✕</button>
+        </div>
+
+        <!-- Modal Body: Two-column layout -->
+        <div class="hk-modal-body">
+
+          <!-- LEFT PANEL: Room info + circular progress -->
+          <div class="hk-modal-left">
+
+            <!-- Room identifier -->
+            <div class="hk-room-hero">
+              <div class="hk-room-num-big">{{ activeSession()!.room.roomNumber }}</div>
+              <div class="hk-room-cat-big">{{ activeSession()!.room.category }}</div>
+              <div class="hk-room-floor-big">
+                Floor {{ getFloor(activeSession()!.room.roomNumber) }}
+              </div>
+            </div>
+
+            <!-- Circular progress ring -->
+            <div class="hk-progress-ring-wrap">
+              <svg class="hk-progress-ring" viewBox="0 0 120 120" width="120" height="120">
+                <circle class="ring-bg" cx="60" cy="60" r="50" />
+                <circle class="ring-fill"
+                        cx="60" cy="60" r="50"
+                        [style.stroke-dasharray]="314"
+                        [style.stroke-dashoffset]="314 - (checkedCount / 10) * 314" />
+              </svg>
+              <div class="ring-label">
+                <span class="ring-num">{{ checkedCount }}</span>
+                <span class="ring-denom">/10</span>
+              </div>
+            </div>
+
+            <!-- Linear progress bar -->
+            <div class="hk-session-bar-wrap">
+              <div class="hk-session-bar-track">
+                <div class="hk-session-bar-fill"
+                     [style.width.%]="(checkedCount / 10) * 100">
+                </div>
+              </div>
+              <div class="hk-session-bar-label">
+                {{ ((checkedCount / 10) * 100).toFixed(0) }}% complete
+              </div>
+            </div>
+
+            <!-- Session actions -->
+            <div class="hk-session-actions">
+              <button class="btn btn-primary hk-complete-btn"
+                      [disabled]="!allChecked"
+                      (click)="completeCleaning()">
+                @if (allChecked) {
+                  ✓ Complete &amp; Mark Clean
+                } @else {
+                  Complete ({{ 10 - checkedCount }} remaining)
+                }
+              </button>
+              <button class="btn btn-ghost hk-pause-btn" (click)="cancelSession()">
+                ⏸ Pause Session
+              </button>
+            </div>
+
+            <!-- Room info details -->
+            <div class="hk-room-details">
+              <div class="hk-detail-row">
+                <span class="hk-detail-label">Status</span>
+                <span class="badge badge-cleaning">In Cleaning</span>
+              </div>
+              <div class="hk-detail-row">
+                <span class="hk-detail-label">Price/night</span>
+                <span class="hk-detail-val">${{ activeSession()!.room.pricePerNight }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: Checklist + notes -->
+          <div class="hk-modal-right">
+            <div class="hk-checklist-header">
+              <h3 class="hk-checklist-title">Cleaning Checklist</h3>
+              <span class="hk-checklist-progress">
+                {{ checkedCount }} of 10 tasks
+              </span>
+            </div>
+
+            <div class="hk-checklist-scroll">
+              @for (item of activeSession()!.checklist; track $index) {
+                <div class="checklist-item" [class.checked]="item.checked"
+                     (click)="toggleChecklistItem($index)">
+                  <div class="checklist-checkbox">
+                    @if (item.checked) {
+                      <span class="check-tick">✓</span>
+                    }
+                  </div>
+                  <div class="checklist-content">
+                    <span class="checklist-label">{{ item.label }}</span>
+                    @if (item.checked) {
+                      <span class="checklist-done-tag">Done</span>
+                    }
+                  </div>
+                  <div class="checklist-num">{{ $index + 1 }}/10</div>
+                </div>
+              }
+            </div>
+
+            <!-- Notes area -->
+            <div class="hk-notes-section">
+              <label class="form-label hk-notes-label">
+                📝 Session Notes
+              </label>
+              <textarea class="form-input hk-notes-input"
+                        placeholder="Record any issues, maintenance needs, or special observations…"
+                        [(ngModel)]="activeSession()!.notes"
+                        rows="4">
+              </textarea>
+            </div>
+
+            <!-- Checklist completion summary -->
+            @if (allChecked) {
+              <div class="hk-all-done-banner">
+                <span class="done-icon">🎉</span>
+                <span>All tasks complete! Ready to mark as clean.</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── TOAST NOTIFICATION ──────────────────────────────────────── -->
+  @if (toast()) {
+    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
+      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
+      <span class="toast-msg">{{ toast() }}</span>
+    </div>
+  }
+
+</div>
