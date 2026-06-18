@@ -1,4 +1,4 @@
-﻿<!-- ── NAV ─────────────────────────────────────────────────── -->
+<!-- ── NAV ─────────────────────────────────────────────────── -->
 <nav class="public-nav" [class.nav-scrolled]="isScrolled">
   <div class="nav-brand">
     <span class="nav-logo-text">Salzburger Hof</span>
@@ -12,7 +12,7 @@
     <a href="#ski">Ski</a>
     <a href="#rooms">Rooms</a>
     <a href="#booking-widget">Reserve</a>
-    <button class="btn btn-outline btn-sm" id="staff-login-btn" (click)="goToLogin()">Staff Login</button>
+    <button class="btn btn-outline btn-sm" id="staff-login-btn" (click)="goToLogin()">Login</button>
   </div>
 </nav>
 
@@ -30,9 +30,16 @@
 
   <div class="hero-content">
     <p class="hero-eyebrow">SALZBURG, AUSTRIA ✦ EST. 1887</p>
+    @if (weatherInfo()) {
+      <div class="hero-weather-widget">
+        <span class="weather-icon">{{ weatherInfo()!.icon }}</span>
+        <span class="weather-temp">{{ weatherInfo()!.temperature }}°C</span>
+        <span class="weather-desc">{{ weatherInfo()!.text }} in Bad Gastein</span>
+      </div>
+    }
     <h1 class="hero-headline heading-display">
-      Alpine<br/>
-      <span class="headline-accent">Warmth.</span>
+      Hotel<br/>
+      <span class="headline-accent">Salzburger Hof</span>
     </h1>
     <p class="hero-subtext">
       Where ancient Alpine traditions meet five-star refinement.
@@ -113,6 +120,88 @@
               <option [value]="type">{{ type }}</option>
             }
           </select>
+        </div>
+        <div class="booking-field booking-field--full">
+          <label>PREMIUM ADD-ONS (OPTIONAL)</label>
+          <div class="custom-addons-dropdown">
+            <button type="button" class="dropdown-trigger" (click)="toggleAddonsDropdown()">
+              <span class="trigger-text">
+                @if (getAddonsList().length === 0) {
+                  Select premium additions...
+                } @else {
+                  {{ getAddonsList().join(', ') }}
+                }
+              </span>
+              <span class="trigger-arrow" [class.open]="showAddonsDropdown()">▼</span>
+            </button>
+            
+            @if (showAddonsDropdown()) {
+              <div class="dropdown-menu">
+                <div class="dropdown-item" (click)="$event.stopPropagation()">
+                  <label class="checkbox-container">
+                    <input type="checkbox" [(ngModel)]="selectedAddons.spa" name="spaAddon"/>
+                    <span class="checkmark"></span>
+                    <span class="item-label">Wellness & Spa Access (+€120)</span>
+                  </label>
+                </div>
+                <div class="dropdown-item" (click)="$event.stopPropagation()">
+                  <label class="checkbox-container">
+                    <input type="checkbox" [(ngModel)]="selectedAddons.ski" name="skiAddon"/>
+                    <span class="checkmark"></span>
+                    <span class="item-label">VIP Ski Pass (+€150)</span>
+                  </label>
+                </div>
+                <div class="dropdown-item" (click)="$event.stopPropagation()">
+                  <label class="checkbox-container">
+                    <input type="checkbox" [(ngModel)]="selectedAddons.dining" name="diningAddon"/>
+                    <span class="checkmark"></span>
+                    <span class="item-label">Alpine Fine Dining (+€80)</span>
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Price Calculator Receipt Widget -->
+      <div class="booking-receipt-wrap">
+        <div class="booking-receipt">
+          <div class="receipt-header">
+            <span class="receipt-title">RECEIPT PREVIEW</span>
+            <span class="receipt-decor">✦ ✦ ✦</span>
+          </div>
+          
+          <div class="receipt-row">
+            <span class="receipt-label">{{ bookingForm.roomType }} Room &times; {{ calculateNights() }} {{ calculateNights() === 1 ? 'night' : 'nights' }}</span>
+            <span class="receipt-value">€{{ getBasePrice() | number:'1.2-2' }}</span>
+          </div>
+          
+          @if (selectedAddons.spa) {
+            <div class="receipt-row receipt-row--addon">
+              <span class="receipt-label">✦ Wellness & Spa Access</span>
+              <span class="receipt-value">+€120.00</span>
+            </div>
+          }
+          @if (selectedAddons.ski) {
+            <div class="receipt-row receipt-row--addon">
+              <span class="receipt-label">✦ VIP Ski Pass</span>
+              <span class="receipt-value">+€150.00</span>
+            </div>
+          }
+          @if (selectedAddons.dining) {
+            <div class="receipt-row receipt-row--addon">
+              <span class="receipt-label">✦ Alpine Fine Dining</span>
+              <span class="receipt-value">+€80.00</span>
+            </div>
+          }
+          
+          <div class="receipt-divider"></div>
+          
+          <div class="receipt-row receipt-row--total">
+            <span class="total-label">TOTAL ESTIMATED</span>
+            <span class="total-value">€{{ calculateTotalPrice() | number:'1.2-2' }}</span>
+          </div>
         </div>
       </div>
 
@@ -539,3 +628,13 @@
     <p>© 2024 Hotel Salzburger Hof Bad Gastein. All Rights Reserved.</p>
   </div>
 </footer>
+
+@if (showPaymentModal()) {
+  <app-payment-modal
+    [amount]="bookingTotal()"
+    [description]="bookingForm.roomType + ' Suite Reservation (' + bookingNights() + ' nights)'"
+    [showPayLater]="true"
+    (paymentCompleted)="onPaymentCompleted($event)"
+    (cancelled)="onPaymentCancelled()">
+  </app-payment-modal>
+}

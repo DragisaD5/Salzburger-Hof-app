@@ -1,9 +1,9 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { RoomService, RoomStats } from '../../../core/services/room.service';
-import { TicketService, TicketStats } from '../../../core/services/ticket.service';
+import { TicketService, TicketStats, Ticket } from '../../../core/services/ticket.service';
 import { BookingService, Booking } from '../../../core/services/booking.service';
 import { UserService, StaffUser } from '../../../core/services/user.service';
 
@@ -14,15 +14,17 @@ import { UserService, StaffUser } from '../../../core/services/user.service';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   user: any;
   today = new Date();
-  activeTab = signal<'overview' | 'staff' | 'bookings'>('overview');
+  activeTab = signal<'overview' | 'staff' | 'bookings' | 'tickets'>('overview');
 
   roomStats = signal<RoomStats | null>(null);
   ticketStats = signal<TicketStats | null>(null);
   bookings = signal<Booking[]>([]);
   staff = signal<StaffUser[]>([]);
+  tickets = signal<Ticket[]>([]);
+  activityLogs = signal<any[]>([]);
   loading = signal(true);
   toast = signal('');
   toastType = signal<'success' | 'error'>('success');
@@ -59,17 +61,48 @@ export class AdminDashboardComponent implements OnInit {
     this.user = auth.currentUser();
   }
 
+  private pollInterval: any;
+
   ngOnInit(): void {
     this.loadAll();
+    this.startPolling();
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
+  }
+
+  startPolling(): void {
+    this.pollInterval = setInterval(() => {
+      this.refreshLogsAndDirectory();
+    }, 4000); // Poll every 4 seconds to reflect changes dynamically
+  }
+
+  refreshLogsAndDirectory(): void {
+    this.userService.getUsers().subscribe({
+      next: (u) => this.staff.set(u),
+      error: (err) => console.error('Failed to poll users:', err)
+    });
+    this.userService.getActivityLogs().subscribe({
+      next: (logs) => this.activityLogs.set(logs),
+      error: (err) => console.error('Failed to poll activity logs:', err)
+    });
   }
 
   loadAll(): void {
     this.roomService.getStats().subscribe({ next: (s) => this.roomStats.set(s) });
     this.ticketService.getStats().subscribe({ next: (s) => this.ticketStats.set(s) });
     this.bookingService.getBookings().subscribe({ next: (b) => this.bookings.set(b) });
+    this.ticketService.getTickets().subscribe({ next: (t) => this.tickets.set(t) });
     this.userService.getUsers().subscribe({
       next: (u) => { this.staff.set(u); this.loading.set(false); },
       error: () => this.loading.set(false),
+    });
+    this.userService.getActivityLogs().subscribe({
+      next: (logs) => this.activityLogs.set(logs),
+      error: (err) => console.error('Failed to load activity logs:', err)
     });
   }
 
@@ -112,7 +145,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getRoleIcon(role: string): string {
-    const icons: Record<string, string> = { Admin: '⬡', Receptionist: '🛎', Housekeeping: '🧹', Maintenance: '🔧', Guest: '🏨' };
+    const icons: Record<string, string> = { Admin: '⬡', Receptionist: '⚜', Housekeeping: '✿', Maintenance: '⚙', Guest: '◆' };
     return icons[role] || '●';
   }
 
@@ -129,6 +162,29 @@ export class AdminDashboardComponent implements OnInit {
 
   getRevenue = (acc: number, b: Booking): number =>
     ['Active', 'Confirmed'].includes(b.status) ? acc + (b.totalPrice ?? 0) : acc;
+
+  deleteBooking(booking: Booking): void {
+    if (!confirm(`Are you sure you want to permanently delete the reservation for ${booking.guestName}?`)) return;
+    this.bookingService.deleteBooking(booking._id).subscribe({
+      next: () => {
+        this.bookings.update((prev) => prev.filter((b) => b._id !== booking._id));
+        this.showToast('Reservation deleted.', 'success');
+      },
+      error: () => this.showToast('Failed to delete reservation.', 'error'),
+    });
+  }
+
+  deleteTicket(ticket: Ticket): void {
+    if (!confirm(`Are you sure you want to delete the service ticket for room ${ticket.roomNumber}?`)) return;
+    this.ticketService.deleteTicket(ticket._id).subscribe({
+      next: () => {
+        this.tickets.update((prev) => prev.filter((t) => t._id !== ticket._id));
+        this.showToast('Ticket deleted.', 'success');
+        this.ticketService.getStats().subscribe({ next: (s) => this.ticketStats.set(s) });
+      },
+      error: () => this.showToast('Failed to delete ticket.', 'error'),
+    });
+  }
 
   private showToast(msg: string, type: 'success' | 'error' = 'success'): void {
     this.toast.set(msg);

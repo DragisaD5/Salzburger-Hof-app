@@ -1,14 +1,18 @@
-﻿<!-- ── LOGIN PAGE ──────────────────────────────────────────── -->
+<!-- ── LOGIN PAGE ──────────────────────────────────────────── -->
 <div class="login-page">
 
-  <!-- LEFT — Brand Immersion Panel -->
+  <!-- LEFT — Full-bleed Hotel Photo Immersion -->
   <div class="login-left">
-    <!-- Decorative pine branch SVG pattern -->
-    <div class="left-decor-top"></div>
-    <div class="left-decor-bottom"></div>
+    <!-- Overlay gradient -->
+    <div class="left-overlay"></div>
 
-    <!-- Hotel identity -->
-    <div class="login-left-header">
+    <!-- Floating particles -->
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+
+    <!-- Top badge -->
+    <div class="left-top">
       <div class="hotel-badge">
         <span class="badge-star">✦</span>
         <span class="badge-text">EST. 1887</span>
@@ -19,146 +23,343 @@
     </div>
 
     <!-- Main quote -->
-    <div class="login-left-middle">
+    <div class="left-center">
       <h2 class="login-headline">
-        Where the Alps<br/>
-        <em>meet warmth.</em>
+        A century of<br/>
+        <em>flawless service.</em>
       </h2>
-      <div class="divider-line"></div>
+      <div class="headline-bar"></div>
       <p class="login-left-desc">
-        Staff portal for hotel operations. Serving guests with care since 1887 — from the heart of the Austrian Alps.
+        Since 1887, Salzburger Hof has set the standard for Austrian hospitality — refined rooms, world-class dining, and a team that anticipates every need before it is spoken.
       </p>
     </div>
 
-    <!-- Staff roles -->
-    <div class="login-left-footer">
+    <!-- Bottom role pills -->
+    <div class="left-bottom">
       <p class="roles-label">PORTAL ACCESS FOR</p>
       <div class="staff-roles">
-        <div class="staff-role-item">
-          <span class="role-icon">⬡</span>
+        <div class="role-pill">
+          <span class="role-pill-icon">◆</span>
           <span>Administration</span>
         </div>
-        <div class="staff-role-item">
-          <span class="role-icon">🛎</span>
-          <span>Concierge & Reception</span>
+        <div class="role-pill">
+          <span class="role-pill-icon">⚜</span>
+          <span>Reception</span>
         </div>
-        <div class="staff-role-item">
-          <span class="role-icon">🧹</span>
+        <div class="role-pill">
+          <span class="role-pill-icon">✿</span>
           <span>Housekeeping</span>
         </div>
-        <div class="staff-role-item">
-          <span class="role-icon">🔧</span>
+        <div class="role-pill">
+          <span class="role-pill-icon">⚙</span>
           <span>Maintenance</span>
         </div>
-        <div class="staff-role-item">
-          <span class="role-icon">🏨</span>
-          <span>Guest Services</span>
+        <div class="role-pill role-pill--guest">
+          <span class="role-pill-icon">♨</span>
+          <span>Guests</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT — Login Form -->
+  <!-- RIGHT — Glass Card -->
   <div class="login-right">
-    <div class="login-form-box">
+    <div class="login-card" [class.card--register]="isRegisterMode()">
+
+      <!-- Top nav line -->
+      <div class="card-top-bar">
+        <button class="back-btn" type="button" (click)="goBack()">
+          <span class="back-arrow">←</span>
+          <span>Hotel Website</span>
+        </button>
+        <div class="card-badge">✦ SALZBURGER HOF</div>
+      </div>
+
+      <!-- Mode tabs -->
+      <div class="mode-tabs">
+        <button
+          class="mode-tab"
+          [class.active]="!isRegisterMode()"
+          (click)="isRegisterMode.set(false); error.set('')"
+        >
+          <span class="tab-icon">⚜</span>
+          Login
+        </button>
+        <button
+          class="mode-tab"
+          [class.active]="isRegisterMode()"
+          (click)="isRegisterMode.set(true); error.set('')"
+        >
+          <span class="tab-icon">♨</span>
+          Guest Register
+        </button>
+        <div class="tab-slider" [class.right]="isRegisterMode()"></div>
+      </div>
 
       <!-- Form header -->
       <div class="form-header">
-        <p class="form-eyebrow">STAFF PORTAL</p>
-        <h2 class="login-form-title">Welcome back</h2>
-        <p class="login-form-sub">Sign in to access your dashboard</p>
+        <h2 class="form-title">
+          @if (!isRegisterMode()) { Welcome back }
+          @if (isRegisterMode()) { Create Digital Key }
+        </h2>
+        <p class="form-subtitle">
+          @if (!isRegisterMode()) { Sign in to access your dashboard }
+          @if (isRegisterMode()) { Register your suite for full hotel access }
+        </p>
       </div>
 
-      <!-- Form -->
-      <form class="login-form" (ngSubmit)="onLogin()" #loginFormRef="ngForm">
-        <div class="form-group">
-          <label class="form-label" for="username-input">Username</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input
-              id="username-input"
-              class="form-input form-input--icon"
-              type="text"
-              [(ngModel)]="form.username"
-              name="username"
-              placeholder="your.username"
-              autocomplete="username"
-              required
-            />
-          </div>
-        </div>
+      <!-- ── STAFF LOGIN FORM ── -->
+      @if (!isRegisterMode()) {
+        <form class="login-form" (ngSubmit)="onLogin()" #loginFormRef="ngForm">
 
-        <div class="form-group">
-          <label class="form-label" for="password-input">Password</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
-            <input
-              id="password-input"
-              class="form-input form-input--icon"
-              [type]="showPassword ? 'text' : 'password'"
-              [(ngModel)]="form.password"
-              name="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              required
-            />
-            <button
-              type="button"
-              class="input-eye"
-              (click)="showPassword = !showPassword"
-              tabindex="-1"
-            >{{ showPassword ? '🙈' : '👁' }}</button>
+          <div class="field-group">
+            <label class="field-label" for="username-input">Username</label>
+            <div class="field-wrap">
+              <span class="field-icon">◇</span>
+              <input
+                id="username-input"
+                class="field-input"
+                type="text"
+                [(ngModel)]="form.username"
+                name="username"
+                placeholder="your.username"
+                autocomplete="username"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        @if (error()) {
-          <div class="login-error">
-            <span>⚠</span>
-            <span>{{ error() }}</span>
+          <div class="field-group">
+            <label class="field-label" for="password-input">Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">⚿</span>
+              <input
+                id="password-input"
+                class="field-input"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="form.password"
+                name="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1">
+                {{ showPassword ? '⊘' : '⊙' }}
+              </button>
+            </div>
           </div>
-        }
 
-        <button
-          id="login-submit-btn"
-          type="submit"
-          class="btn btn-primary login-btn"
-          [disabled]="loading()"
-        >
-          @if (loading()) {
-            <span class="spinner"></span>
-            <span>Signing in…</span>
-          } @else {
-            <span>Sign In</span>
-            <span class="btn-arrow">→</span>
+          @if (successMsg()) {
+            <div class="form-success">
+              <span class="success-icon">✓</span>
+              <span>{{ successMsg() }}</span>
+            </div>
           }
-        </button>
-      </form>
 
-      <!-- Quick credential hints -->
-      <div class="credential-hints">
-        <p class="hints-title">Quick Access — Click to fill</p>
-        <div class="hint-grid">
-          @for (hint of hints; track hint.role) {
-            <button
-              class="hint-item"
-              [id]="'hint-' + hint.role.toLowerCase()"
-              type="button"
-              (click)="fillCredentials(hint.username, hint.password)"
-            >
-              <span class="hint-icon">{{ hint.icon }}</span>
-              <div class="hint-info">
-                <span class="hint-role">{{ hint.role }}</span>
-                <span class="hint-user">{{ hint.username }}</span>
+          @if (error()) {
+            <div class="form-error">
+              <span class="error-icon">⚠</span>
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <button id="login-submit-btn" type="submit" class="submit-btn" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner"></span>
+              <span>Signing in…</span>
+            } @else {
+              <span>Sign In to Portal</span>
+              <span class="submit-arrow">→</span>
+            }
+          </button>
+        </form>
+
+        <!-- Quick-fill credential hints -->
+        <div class="hints-panel">
+          <p class="hints-label">
+            <span class="hints-line"></span>
+            Quick Access
+            <span class="hints-line"></span>
+          </p>
+          <div class="hints-grid">
+            @for (hint of hints; track hint.role) {
+              <button
+                class="hint-chip"
+                [id]="'hint-' + hint.role.toLowerCase()"
+                type="button"
+                (click)="fillCredentials(hint.username, hint.password)"
+              >
+                <span class="chip-icon">{{ hint.icon }}</span>
+                <span class="chip-role">{{ hint.role }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── GUEST REGISTRATION FORM ── -->
+      @if (isRegisterMode()) {
+        <form class="login-form" (ngSubmit)="onRegister()" #registerFormRef="ngForm">
+
+          <div class="reg-grid">
+            <div class="field-group">
+              <label class="field-label" for="reg-name">Full Name</label>
+              <div class="field-wrap">
+                <span class="field-icon">◇</span>
+                <input
+                  id="reg-name"
+                  class="field-input"
+                  type="text"
+                  [(ngModel)]="registerForm.displayName"
+                  name="displayName"
+                  placeholder="e.g. Johann Müller"
+                  required
+                />
               </div>
-              <span class="hint-arrow">↗</span>
-            </button>
-          }
-        </div>
-      </div>
+            </div>
 
-      <div class="back-link">
-        <button type="button" (click)="goBack()">← Back to hotel website</button>
-      </div>
+            <div class="field-group">
+              <label class="field-label" for="reg-room">Your Suite</label>
+              <div class="field-wrap">
+                <span class="field-icon">⌂</span>
+                <select
+                  id="reg-room"
+                  class="field-input field-select"
+                  [(ngModel)]="registerForm.roomNumber"
+                  name="roomNumber"
+                  required
+                >
+                  <option [ngValue]="null" disabled selected>Select Your Suite</option>
+                  @for (room of roomNumbers; track room) {
+                    <option [ngValue]="room">Room {{ room }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-email">Email Address</label>
+            <div class="field-wrap">
+              <span class="field-icon">{{ '@' }}</span>
+              <input
+                id="reg-email"
+                class="field-input"
+                type="email"
+                [(ngModel)]="registerForm.email"
+                name="email"
+                placeholder="your.email{{ '@' }}example.com"
+                required
+              />
+            </div>
+            <small class="field-helper-text">
+              *(Please use the same email address provided during your initial room reservation).*
+            </small>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-phone">Phone Number</label>
+            <div class="field-wrap">
+              <span class="field-icon">☏</span>
+              <input
+                id="reg-phone"
+                class="field-input"
+                type="tel"
+                [(ngModel)]="registerForm.phone"
+                name="phone"
+                placeholder="Numbers only (e.g. 4364342037)"
+                required
+              />
+            </div>
+            <small class="field-helper-text">
+              Numbers only. Required for physical check-in verification.
+            </small>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-username">Choose Username</label>
+            <div class="field-wrap">
+              <span class="field-icon">✉</span>
+              <input
+                id="reg-username"
+                class="field-input"
+                type="text"
+                [(ngModel)]="registerForm.username"
+                name="username"
+                placeholder="firstname.lastname"
+                autocomplete="username"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-password">Choose Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">⚿</span>
+              <input
+                id="reg-password"
+                class="field-input"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="registerForm.password"
+                name="password"
+                placeholder="Min. 8 chars, 1 uppercase, 1 number"
+                autocomplete="new-password"
+                required
+              />
+              <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1">
+                {{ showPassword ? '⊘' : '⊙' }}
+              </button>
+            </div>
+          </div>
+
+          @if (error()) {
+            <div class="form-error">
+              <span class="error-icon">⚠</span>
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <button type="submit" class="submit-btn submit-btn--register" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner"></span>
+              <span>Creating your key…</span>
+            } @else {
+              <span>Create Digital Key</span>
+              <span class="submit-arrow">→</span>
+            }
+          </button>
+        </form>
+
+        <div class="brutalist-security-note">
+          <p class="note-text">
+            <strong>SECURITY NOTE:</strong> To activate your VIP Portal, please present your ID at the reception desk upon arrival. Our team will verify your phone number and unlock your account immediately.
+          </p>
+        </div>
+
+        <!-- Perks preview -->
+        <div class="register-perks">
+          <p class="perks-label">✦ YOUR GUEST KEY UNLOCKS</p>
+          <div class="perks-grid">
+            <div class="perk-item">
+              <span class="perk-icon">🛎</span>
+              <span>In-Room Dining</span>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">🧖</span>
+              <span>Spa Booking</span>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">🍽</span>
+              <span>Restaurant</span>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">🔧</span>
+              <span>Concierge</span>
+            </div>
+          </div>
+        </div>
+      }
 
     </div>
   </div>

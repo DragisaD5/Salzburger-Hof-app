@@ -7,12 +7,17 @@ export interface Ticket {
   _id: string;
   roomNumber: number;
   category: string;
+  type?: 'Maintenance' | 'RoomService';
   priority: 'Low' | 'High' | 'URGENT';
   status: 'Open' | 'In Progress' | 'Resolved';
   description: string;
   reportedBy?: string;
   notes?: string;
   resolvedAt?: string;
+  paymentStatus?: 'Unpaid' | 'Paid' | 'Pending';
+  paymentMethod?: 'Card' | 'PayPal' | 'Room Charge';
+  transactionId?: string;
+  price?: number;
   createdAt: string;
 }
 
@@ -29,20 +34,27 @@ export class TicketService {
 
   constructor(private http: HttpClient) {}
 
-  getTickets(filters?: { status?: string; priority?: string; roomNumber?: number }): Observable<Ticket[]> {
+  getTickets(filters?: { status?: string; priority?: string; roomNumber?: number; type?: string }): Observable<Ticket[]> {
     let params = new HttpParams();
     if (filters?.status) params = params.set('status', filters.status);
     if (filters?.priority) params = params.set('priority', filters.priority);
     if (filters?.roomNumber) params = params.set('roomNumber', String(filters.roomNumber));
+    if (filters?.type) params = params.set('type', filters.type);
     return this.http.get<Ticket[]>(this.base, { params });
   }
 
-  getStats(): Observable<TicketStats> {
-    return this.http.get<TicketStats>(`${this.base}/stats`);
+  getStats(filters?: { type?: string }): Observable<TicketStats> {
+    let params = new HttpParams();
+    if (filters?.type) params = params.set('type', filters.type);
+    return this.http.get<TicketStats>(`${this.base}/stats`, { params });
   }
 
   createTicket(data: Partial<Ticket>): Observable<Ticket> {
     return this.http.post<Ticket>(this.base, data);
+  }
+
+  updateTicket(id: string, data: Partial<Ticket>): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.base}/${id}`, data);
   }
 
   resolveTicket(id: string, notes?: string): Observable<Ticket> {

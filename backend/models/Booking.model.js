@@ -50,6 +50,22 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    paymentStatus: {
+      type: String,
+      enum: ['Unpaid', 'Paid', 'Refunded', 'Pending'],
+      default: 'Unpaid',
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['Card', 'PayPal', 'Pay At Check-In'],
+      default: 'Pay At Check-In',
+    },
+    transactionId: {
+      type: String,
+      required: function() {
+        return this.paymentStatus === 'Paid';
+      }
+    },
     specialRequests: {
       type: String,
       default: '',
@@ -58,6 +74,10 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       enum: ['Online', 'Walk-in', 'Phone'],
       default: 'Online',
+    },
+    addons: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }

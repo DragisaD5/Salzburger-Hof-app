@@ -11,6 +11,8 @@ export interface AuthUser {
   displayName: string;
   role: string;
   roomNumber?: number;
+  email?: string;
+  phoneNumber?: string;
 }
 
 export interface LoginResponse {
@@ -40,6 +42,15 @@ export class AuthService {
           this._currentUser.set(res.user);
         })
       );
+  }
+
+  register(data: { username: string; password: string; displayName: string; roomNumber: number | null }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/register`, data);
+  }
+
+  updateCurrentUser(user: AuthUser): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this._currentUser.set(user);
   }
 
   logout(): void {

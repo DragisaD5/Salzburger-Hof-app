@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    HOTEL Salzburger Hof — ALPINE WARMTH DESIGN SYSTEM
    Palette: Cream · Pine Green · Warm Amber · Alpine Stone
    ============================================================ */
@@ -276,6 +276,10 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
 .badge-vip       { background: var(--accent-amber-pale); color: var(--accent-amber); border-color: rgba(184,118,42,0.4); }
 .badge-low       { background: var(--bg-secondary); color: var(--text-muted); border-color: var(--border); }
 .badge-high      { background: rgba(193,127,36,0.1); color: var(--warning); border-color: rgba(193,127,36,0.35); }
+.badge-paid-card   { background: var(--success-bg); color: var(--success); border-color: rgba(45,122,79,0.3); }
+.badge-paid-paypal { background: rgba(0, 121, 193, 0.08); color: #0079c1; border-color: rgba(0, 121, 193, 0.25); }
+.badge-paid        { background: var(--success-bg); color: var(--success); border-color: rgba(45,122,79,0.3); }
+.badge-pay-later   { background: var(--accent-amber-pale); color: var(--accent-amber); border-color: rgba(184,118,42,0.35); }
 
 /* ── Marquee ──────────────────────────────────────────────── */
 .marquee-wrapper {
@@ -325,6 +329,7 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
   background: var(--bg-primary);
 }
 
+/* ── Dashboard Header — Premium Shared ───────────────────── */
 .dashboard-header {
   display: flex;
   align-items: center;
@@ -337,8 +342,132 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
   position: sticky;
   top: 0;
   z-index: 100;
+  gap: 16px;
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-logo {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-pine);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.logo-star {
+  font-size: 10px;
+  color: var(--accent-amber);
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+.header-role-badge {
+  padding: 3px 10px;
+  background: var(--accent-amber-pale);
+  border: 1px solid rgba(184,118,42,0.3);
+  border-radius: 100px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-amber);
+  white-space: nowrap;
+
+  &--admin {
+    background: rgba(212,168,87,0.12);
+    border-color: rgba(212,168,87,0.4);
+    color: #8a6a00;
+  }
+
+  &--maintenance {
+    background: var(--danger-bg);
+    border-color: rgba(176,58,46,0.3);
+    color: var(--danger);
+  }
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-tagline {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.header-date {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.header-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-pine), var(--accent-pine-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: var(--font-heading);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(45,90,61,0.25);
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1;
+}
+
+.header-user-name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.header-user-role {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Dashboard Logo (legacy compat) ──────────────────────── */
 .dashboard-logo {
   font-family: var(--font-heading);
   font-size: 18px;

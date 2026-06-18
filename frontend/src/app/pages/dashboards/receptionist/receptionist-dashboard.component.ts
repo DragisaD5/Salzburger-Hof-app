@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { RoomService, Room, RoomStats } from '../../../core/services/room.service';
 import { BookingService, Booking } from '../../../core/services/booking.service';
+import { UserService, StaffUser } from '../../../core/services/user.service';
+import { TicketService, Ticket } from '../../../core/services/ticket.service';
 
 @Component({
   selector: 'app-receptionist-dashboard',
@@ -14,16 +16,20 @@ import { BookingService, Booking } from '../../../core/services/booking.service'
 })
 export class ReceptionistDashboardComponent implements OnInit {
   user: any;
-  activeTab = signal<'rooms' | 'reservations' | 'walkin'>('rooms');
+  activeTab = signal<'rooms' | 'reservations' | 'walkin' | 'verifications' | 'orders'>('rooms');
 
   rooms = signal<Room[]>([]);
   bookings = signal<Booking[]>([]);
+  pendingGuests = signal<StaffUser[]>([]);
+  orders = signal<Ticket[]>([]);
   stats = signal<RoomStats | null>(null);
   loading = signal(true);
   toast = signal('');
   toastType = signal<'success' | 'error'>('success');
 
   statusFilter = signal('');
+
+  activeOrdersCount = computed(() => this.orders().filter(o => o.status !== 'Resolved').length);
 
   filteredRooms = computed(() => {
     const filter = this.statusFilter();
@@ -70,7 +76,9 @@ export class ReceptionistDashboardComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private roomService: RoomService,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private userService: UserService,
+    private ticketService: TicketService
   ) {
     this.user = auth.currentUser();
   }
@@ -87,6 +95,11 @@ export class ReceptionistDashboardComponent implements OnInit {
     });
     this.roomService.getStats().subscribe({ next: (s) => this.stats.set(s) });
     this.bookingService.getBookings().subscribe({ next: (b) => this.bookings.set(b) });
+    this.userService.getPendingGuests().subscribe({ next: (users) => this.pendingGuests.set(users) });
+    this.ticketService.getTickets({ type: 'RoomService' }).subscribe({
+      next: (t) => this.orders.set(t),
+      error: (err) => console.error('Failed to load room service orders:', err)
+    });
   }
 
   approveBooking(booking: Booking): void {
@@ -161,10 +174,68 @@ export class ReceptionistDashboardComponent implements OnInit {
     return map[status] || 'badge-low';
   }
 
+  getAvailableRoomsForType(type: string): Room[] {
+    return this.rooms().filter((r) => r.category === type && r.status === 'Free');
+  }
+
+  assignRoom(booking: Booking, roomNumber: number | null): void {
+    const val = roomNumber ? Number(roomNumber) : null;
+    this.bookingService.updateBooking(booking._id, { roomNumber: val ?? undefined }).subscribe({
+      next: (updated) => {
+        this.bookings.update((prev) =>
+          prev.map((b) => (b._id === updated._id ? updated : b))
+        );
+        this.showToast(`Room RM ${val} assigned to ${booking.guestName}.`, 'success');
+      },
+      error: () => this.showToast('Failed to assign room.', 'error'),
+    });
+  }
+
+  approveGuest(guestId: string): void {
+    this.userService.updateUserStatus(guestId, 'Active').subscribe({
+      next: () => {
+        this.pendingGuests.update((prev) => prev.filter((g) => g._id !== guestId));
+        this.showToast('Guest account approved.', 'success');
+      },
+      error: () => this.showToast('Failed to approve guest.', 'error')
+    });
+  }
+
+  rejectGuest(guestId: string): void {
+    if (!confirm('Reject this guest registration?')) return;
+    this.userService.updateUserStatus(guestId, 'Rejected').subscribe({
+      next: () => {
+        this.pendingGuests.update((prev) => prev.filter((g) => g._id !== guestId));
+        this.showToast('Guest account rejected.', 'success');
+      },
+      error: () => this.showToast('Failed to reject guest.', 'error')
+    });
+  }
+
   private showToast(msg: string, type: 'success' | 'error' = 'success'): void {
     this.toast.set(msg);
     this.toastType.set(type);
     setTimeout(() => this.toast.set(''), 4000);
+  }
+
+  acknowledgeOrder(orderId: string): void {
+    this.ticketService.updateTicket(orderId, { status: 'In Progress' }).subscribe({
+      next: (updated) => {
+        this.orders.update((prev) => prev.map((o) => o._id === updated._id ? updated : o));
+        this.showToast('Order acknowledged.', 'success');
+      },
+      error: () => this.showToast('Failed to acknowledge order.', 'error'),
+    });
+  }
+
+  fulfillOrder(orderId: string): void {
+    this.ticketService.resolveTicket(orderId).subscribe({
+      next: (updated) => {
+        this.orders.update((prev) => prev.map((o) => o._id === updated._id ? updated : o));
+        this.showToast('Order fulfilled and completed.', 'success');
+      },
+      error: () => this.showToast('Failed to fulfill order.', 'error'),
+    });
   }
 
   logout(): void { this.auth.logout(); }

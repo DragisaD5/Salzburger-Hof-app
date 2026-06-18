@@ -11,6 +11,11 @@ export interface StaffUser {
   roomNumber?: number;
   lastLogin?: string;
   createdAt: string;
+  email?: string;
+  phoneNumber?: string;
+  phone?: string;
+  accountStatus?: string;
+  bookingEmail?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,5 +42,21 @@ export class UserService {
 
   deleteUser(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/${id}`);
+  }
+
+  updateUserProfile(data: any): Observable<StaffUser> {
+    return this.http.put<StaffUser>(`${this.base}/profile`, data);
+  }
+
+  getPendingGuests(): Observable<StaffUser[]> {
+    return this.http.get<StaffUser[]>(`${this.base}/pending-guests`);
+  }
+
+  getActivityLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/activity-logs`);
+  }
+
+  updateUserStatus(id: string, status: 'Active' | 'Rejected'): Observable<StaffUser> {
+    return this.http.patch<StaffUser>(`${this.base}/${id}/status`, { status });
   }
 }

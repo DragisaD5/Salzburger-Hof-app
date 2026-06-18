@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 // Force Google DNS — bypasses router DNS that blocks SRV records
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
@@ -96,6 +96,8 @@ const STAFF = [
     role: 'Guest',
     displayName: 'Sebastian Müller',
     roomNumber: 201,
+    email: 'guest.room201@gmail.com',
+    phone: '436601234567',
   },
 ];
 
@@ -172,6 +174,7 @@ const SAMPLE_TICKETS = [
     priority: 'URGENT',
     description: 'Bathroom sink completely blocked, water overflowing onto floor.',
     status: 'Open',
+    type: 'Maintenance',
   },
   {
     roomNumber: 203,
@@ -179,6 +182,7 @@ const SAMPLE_TICKETS = [
     priority: 'High',
     description: 'Main ceiling light flickering intermittently. Guest complaining.',
     status: 'Open',
+    type: 'Maintenance',
   },
   {
     roomNumber: 132,
@@ -186,6 +190,7 @@ const SAMPLE_TICKETS = [
     priority: 'URGENT',
     description: 'Heating system not responding. Room temperature dropping — guest furious.',
     status: 'In Progress',
+    type: 'Maintenance',
   },
   {
     roomNumber: 201,
@@ -193,6 +198,7 @@ const SAMPLE_TICKETS = [
     priority: 'Low',
     description: 'Minibar restock requested. Sparkling water and Austrian white wine.',
     status: 'Open',
+    type: 'RoomService',
   },
   {
     roomNumber: 155,
@@ -200,6 +206,7 @@ const SAMPLE_TICKETS = [
     priority: 'High',
     description: 'Jacuzzi jets not functioning correctly. VIP guest suite.',
     status: 'Open',
+    type: 'RoomService',
   },
   {
     roomNumber: 108,
@@ -207,6 +214,7 @@ const SAMPLE_TICKETS = [
     priority: 'Low',
     description: 'Extra pillow set requested for tonight.',
     status: 'Resolved',
+    type: 'RoomService',
   },
   {
     roomNumber: 127,
@@ -214,6 +222,7 @@ const SAMPLE_TICKETS = [
     priority: 'High',
     description: 'TV remote not working, replacement needed.',
     status: 'Resolved',
+    type: 'Maintenance',
   },
 ];
 
@@ -260,6 +269,9 @@ async function seed() {
     console.log('👥  Seeding staff & guest users...');
     const createdUsers = [];
     for (const staffData of STAFF) {
+      if (!staffData.email) {
+        staffData.email = `${staffData.username}@salzburgerhof.com`;
+      }
       const user = new User(staffData);
       await user.save(); // triggers bcrypt pre-save hook
       createdUsers.push(user);

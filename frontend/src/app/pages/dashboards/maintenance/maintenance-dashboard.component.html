@@ -1,256 +1,171 @@
-<div class="dashboard-layout">
+<!-- ═══════════════════════════════════════════════════════════
+     MAINTENANCE DASHBOARD — Premium Command Center
+     ═══════════════════════════════════════════════════════════ -->
 
-  <!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
+<div class="mn-layout">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
   <header class="dashboard-header">
-    <div class="dashboard-logo">
-      <span class="logo-icon">🔧</span>
-      <div class="logo-text">
-        <span class="logo-name">Aurum Palace</span>
-        <span class="logo-sub">Maintenance Control</span>
-      </div>
+    <div class="header-brand">
+      <div class="header-logo">Salzburger Hof <span class="logo-star">✦</span></div>
+      <div class="header-role-badge">Maintenance</div>
     </div>
-    <div class="dashboard-user">
-      <div class="user-info">
-        <span class="user-name">{{ user?.displayName || user?.username }}</span>
-        <span class="role-pill role-maintenance">⚙️ Maintenance</span>
+    <div class="header-center">
+      <div class="mn-live-date">Engineering & Operations</div>
+    </div>
+    <div class="header-right">
+      <div class="header-avatar">{{ user?.displayName?.charAt(0)?.toUpperCase() ?? 'M' }}</div>
+      <div class="header-user-info">
+        <span class="header-user-name">{{ user?.displayName ?? 'Engineer' }}</span>
+        <span class="header-user-role">Maintenance</span>
       </div>
-      <button class="btn btn-ghost btn-sm" (click)="logout()">Sign Out →</button>
+      <button class="btn btn-ghost btn-sm" id="maintenance-logout-btn" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════ URGENT ALERT BANNER ═══════════════════════════════════════ -->
+  <!-- ── URGENT BANNER ──────────────────────────────────────── -->
   @if (urgentTickets().length > 0) {
-    <div class="urgent-alert-banner">
-      <div class="urgent-alert-inner">
-        <span class="urgent-pulse-dot"></span>
-        <span class="urgent-icon">🚨</span>
-        <span class="urgent-text">
-          <strong>{{ urgentTickets().length }} URGENT {{ urgentTickets().length === 1 ? 'ISSUE' : 'ISSUES' }} REQUIRE IMMEDIATE ATTENTION</strong>
-          <span class="urgent-sub">Scroll down to view and resolve critical maintenance tickets</span>
-        </span>
-        <span class="urgent-count-badge">{{ urgentTickets().length }}</span>
+    <div class="mn-urgent-banner">
+      <div class="mn-urgent-inner">
+        <div class="mn-urgent-icon-box">
+          <span class="mn-urgent-pulse"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="mn-urgent-text">
+          <strong>CRITICAL: {{ urgentTickets().length }} URGENT {{ urgentTickets().length === 1 ? 'TICKET' : 'TICKETS' }}</strong>
+          <span>Immediate engineering response required on property</span>
+        </div>
       </div>
     </div>
   }
 
-  <!-- ═══════════════════════════════════════ MAIN CONTENT ═══════════════════════════════════════ -->
-  <main class="dashboard-content maintenance-content">
+  <!-- ── MAIN ───────────────────────────────────────────────── -->
+  <main class="mn-main">
 
-    <!-- Page Title -->
-    <div class="page-title-row">
-      <div>
-        <h1 class="page-title">Maintenance Operations</h1>
-        <p class="page-subtitle">Track, manage, and resolve property maintenance tickets</p>
-      </div>
-      <div class="title-meta">
-        <span class="live-indicator">
-          <span class="live-dot"></span>
-          Live Dashboard
-        </span>
-      </div>
-    </div>
-
-    <!-- ═══════════ LOADING ═══════════ -->
     @if (loading()) {
-      <div class="loading-center">
+      <div class="mn-loading">
         <div class="spinner"></div>
-        <span class="loading-label">Loading maintenance data…</span>
+        <p>Loading operations data…</p>
       </div>
     } @else {
 
-      <!-- ═══════════════════════════════════════ STAT CARDS ═══════════════════════════════════════ -->
-      <div class="stat-grid maintenance-stat-grid">
-
-        <div class="stat-card stat-card--urgent">
-          <div class="stat-card-inner">
-            <div class="stat-card-icon">🚨</div>
-            <div class="stat-card-body">
-              <div class="stat-number">{{ stats()?.urgent ?? 0 }}</div>
-              <div class="stat-label">Urgent</div>
-            </div>
+      <!-- ── STATS ROW ──────────────────────────────────────── -->
+      <div class="mn-stats-grid">
+        <div class="mn-stat mn-stat--urgent">
+          <div class="mn-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <div class="stat-card-bar stat-card-bar--urgent"></div>
-          @if ((stats()?.urgent ?? 0) > 0) {
-            <div class="stat-card-pulse-ring"></div>
-          }
-        </div>
-
-        <div class="stat-card stat-card--open">
-          <div class="stat-card-inner">
-            <div class="stat-card-icon">📋</div>
-            <div class="stat-card-body">
-              <div class="stat-number">{{ stats()?.open ?? 0 }}</div>
-              <div class="stat-label">Open</div>
-            </div>
+          <div class="mn-stat-info">
+            <div class="mn-stat-num">{{ stats()?.urgent ?? 0 }}</div>
+            <div class="mn-stat-lbl">Urgent</div>
           </div>
-          <div class="stat-card-bar stat-card-bar--open"></div>
         </div>
-
-        <div class="stat-card stat-card--progress">
-          <div class="stat-card-inner">
-            <div class="stat-card-icon">🔨</div>
-            <div class="stat-card-body">
-              <div class="stat-number">{{ stats()?.inProgress ?? 0 }}</div>
-              <div class="stat-label">In Progress</div>
-            </div>
+        <div class="mn-stat mn-stat--open">
+          <div class="mn-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           </div>
-          <div class="stat-card-bar stat-card-bar--progress"></div>
-        </div>
-
-        <div class="stat-card stat-card--resolved">
-          <div class="stat-card-inner">
-            <div class="stat-card-icon">✅</div>
-            <div class="stat-card-body">
-              <div class="stat-number">{{ stats()?.resolved ?? 0 }}</div>
-              <div class="stat-label">Resolved</div>
-            </div>
+          <div class="mn-stat-info">
+            <div class="mn-stat-num">{{ stats()?.open ?? 0 }}</div>
+            <div class="mn-stat-lbl">Open</div>
           </div>
-          <div class="stat-card-bar stat-card-bar--resolved"></div>
         </div>
-
-      </div>
-
-      <!-- ═══════════════════════════════════════ FILTER BAR ═══════════════════════════════════════ -->
-      <div class="filter-bar">
-        <div class="filter-label">Filter by Status</div>
-        <div class="filter-pills">
-          <button
-            class="filter-pill"
-            [class.filter-pill--active]="statusFilter() === ''"
-            (click)="statusFilter.set('')">
-            <span class="filter-pill-dot filter-pill-dot--all"></span>
-            All Tickets
-            <span class="filter-pill-count">{{ tickets().length }}</span>
-          </button>
-          <button
-            class="filter-pill"
-            [class.filter-pill--active]="statusFilter() === 'Open'"
-            (click)="statusFilter.set('Open')">
-            <span class="filter-pill-dot filter-pill-dot--open"></span>
-            Open
-            <span class="filter-pill-count">{{ stats()?.open ?? 0 }}</span>
-          </button>
-          <button
-            class="filter-pill"
-            [class.filter-pill--active]="statusFilter() === 'In Progress'"
-            (click)="statusFilter.set('In Progress')">
-            <span class="filter-pill-dot filter-pill-dot--progress"></span>
-            In Progress
-            <span class="filter-pill-count">{{ stats()?.inProgress ?? 0 }}</span>
-          </button>
-          <button
-            class="filter-pill"
-            [class.filter-pill--active]="statusFilter() === 'Resolved'"
-            (click)="statusFilter.set('Resolved')">
-            <span class="filter-pill-dot filter-pill-dot--resolved"></span>
-            Resolved
-            <span class="filter-pill-count">{{ stats()?.resolved ?? 0 }}</span>
-          </button>
+        <div class="mn-stat mn-stat--progress">
+          <div class="mn-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div class="mn-stat-info">
+            <div class="mn-stat-num">{{ stats()?.inProgress ?? 0 }}</div>
+            <div class="mn-stat-lbl">In Progress</div>
+          </div>
+        </div>
+        <div class="mn-stat mn-stat--resolved">
+          <div class="mn-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="mn-stat-info">
+            <div class="mn-stat-num">{{ stats()?.resolved ?? 0 }}</div>
+            <div class="mn-stat-lbl">Resolved</div>
+          </div>
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════ TICKET GRID ═══════════════════════════════════════ -->
-      <div class="section-header">
-        <h2>{{ statusFilter() || 'All' }} Maintenance Tickets</h2>
-        <span class="ticket-count-label">{{ filteredTickets().length }} {{ filteredTickets().length === 1 ? 'ticket' : 'tickets' }}</span>
+      <!-- ── FILTERS & HEADER ───────────────────────────────── -->
+      <div class="mn-toolbar">
+        <h2 class="mn-section-title">Ticket Queue</h2>
+        <div class="mn-filters">
+          <button class="mn-filter-pill" [class.mn-filter-pill--active]="statusFilter() === ''" (click)="statusFilter.set('')">All</button>
+          <button class="mn-filter-pill" [class.mn-filter-pill--active]="statusFilter() === 'Open'" (click)="statusFilter.set('Open')">Open</button>
+          <button class="mn-filter-pill" [class.mn-filter-pill--active]="statusFilter() === 'In Progress'" (click)="statusFilter.set('In Progress')">In Progress</button>
+          <button class="mn-filter-pill" [class.mn-filter-pill--active]="statusFilter() === 'Resolved'" (click)="statusFilter.set('Resolved')">Resolved</button>
+        </div>
       </div>
 
+      <!-- ── TICKETS GRID ───────────────────────────────────── -->
       @if (filteredTickets().length === 0) {
-        <div class="empty-state">
-          <div class="empty-state-icon">🎉</div>
-          <h3 class="empty-state-title">No Tickets Found</h3>
-          <p class="empty-state-desc">
-            @if (statusFilter()) {
-              There are no {{ statusFilter().toLowerCase() }} maintenance tickets at this time.
-            } @else {
-              The property is running smoothly — no maintenance tickets to display.
-            }
-          </p>
+        <div class="mn-empty">
+          <div class="mn-empty-icon">⚜</div>
+          <h3>System Clear</h3>
+          <p>No maintenance tickets found for this filter.</p>
         </div>
       } @else {
-        <div class="ticket-cards-grid">
+        <div class="mn-grid">
           @for (ticket of filteredTickets(); track ticket._id) {
-            <div class="ticket-card-premium"
-                 [class.ticket-card-premium--urgent]="ticket.priority === 'URGENT'"
-                 [class.ticket-card-premium--resolved]="ticket.status === 'Resolved'">
+            <div class="mn-card" [class.mn-card--urgent]="ticket.priority === 'URGENT'" [class.mn-card--resolved]="ticket.status === 'Resolved'">
+              
+              <div class="mn-card-stripe" [ngClass]="getPriorityClass(ticket.priority)"></div>
 
-              <!-- Priority Stripe -->
-              <div class="ticket-stripe"
-                   [class.ticket-stripe--urgent]="ticket.priority === 'URGENT'"
-                   [class.ticket-stripe--high]="ticket.priority === 'High'"
-                   [class.ticket-stripe--low]="ticket.priority === 'Low'">
-              </div>
-
-              <!-- Card Content -->
-              <div class="ticket-card-content">
-
-                <!-- Top Row: Badges -->
-                <div class="ticket-card-header">
-                  <div class="ticket-badges">
-                    <span class="ticket-room-badge">🏨 Room {{ ticket.roomNumber }}</span>
-                    <span class="ticket-category-tag">{{ ticket.category }}</span>
-                    <span class="badge" [ngClass]="getPriorityClass(ticket.priority)">
-                      @if (ticket.priority === 'URGENT') { 🔴 }
-                      @else if (ticket.priority === 'High') { 🟠 }
-                      @else { 🟡 }
-                      {{ ticket.priority }}
-                    </span>
-                    <span class="badge" [ngClass]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+              <div class="mn-card-body">
+                <div class="mn-card-header">
+                  <div class="mn-card-badges">
+                    <span class="mn-room-badge">RM {{ ticket.roomNumber }}</span>
+                    <span class="mn-cat-badge">{{ ticket.category }}</span>
                   </div>
-                  @if (ticket.priority === 'URGENT' && ticket.status !== 'Resolved') {
-                    <span class="urgent-flame">🔥</span>
+                  @if (ticket.priority === 'URGENT') {
+                    <span class="mn-urgent-mark">♨ URGENT</span>
                   }
                 </div>
 
-                <!-- Description -->
-                <p class="ticket-description">{{ ticket.description }}</p>
+                <p class="mn-card-desc">{{ ticket.description }}</p>
 
-                <!-- Bottom Row: Meta + Action -->
-                <div class="ticket-card-footer">
-                  <div class="ticket-meta">
-                    <span class="ticket-meta-item">
-                      <span class="ticket-meta-icon">🕐</span>
-                      {{ ticket.createdAt | date:'MMM d, y · HH:mm' }}
-                    </span>
-                    <span class="ticket-meta-item">
-                      <span class="ticket-meta-icon">👤</span>
+                <div class="mn-card-footer">
+                  <div class="mn-meta-group">
+                    <div class="mn-meta">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {{ ticket.createdAt | date:'MMM d, HH:mm' }}
+                    </div>
+                    <div class="mn-meta">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       {{ ticket.reportedBy }}
-                    </span>
+                    </div>
                   </div>
 
-                  <div class="ticket-action">
+                  <div class="mn-action-area">
                     @if (ticket.status !== 'Resolved') {
-                      <button class="btn btn-sm btn-resolve"
-                              [class.btn-resolve--urgent]="ticket.priority === 'URGENT'"
-                              (click)="resolveTicket(ticket)">
-                        ✓ Resolve
+                      <button class="mn-resolve-btn" (click)="resolveTicket(ticket)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Resolve
                       </button>
                     } @else {
-                      <div class="resolved-stamp">
-                        <span class="resolved-stamp-icon">✅</span>
-                        <span class="resolved-stamp-text">RESOLVED</span>
-                        @if (ticket.resolvedAt) {
-                          <span class="resolved-stamp-date">{{ ticket.resolvedAt | date:'MMM d' }}</span>
-                        }
+                      <div class="mn-resolved-stamp">
+                        ✓ RESOLVED
                       </div>
                     }
                   </div>
                 </div>
-
               </div>
             </div>
           }
         </div>
       }
-
-    }
+    } <!-- end loading -->
   </main>
 
-  <!-- ═══════════════════════════════════════ TOAST ═══════════════════════════════════════ -->
+  <!-- ── TOAST ──────────────────────────────────────────────── -->
   @if (toast()) {
-    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
-      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
-      {{ toast() }}
+    <div class="mn-toast" [class.mn-toast--success]="toastType() === 'success'" [class.mn-toast--error]="toastType() === 'error'">
+      @if (toastType() === 'success') { <span class="mn-toast-icon">✓</span> }
+      @else { <span class="mn-toast-icon">✕</span> }
+      <span class="mn-toast-text">{{ toast() }}</span>
     </div>
   }
 

@@ -18,6 +18,10 @@ export interface Booking {
   totalPrice: number;
   specialRequests?: string;
   source: string;
+  addons?: string[];
+  paymentStatus?: 'Unpaid' | 'Paid' | 'Refunded' | 'Pending';
+  paymentMethod?: 'Card' | 'PayPal' | 'Pay At Check-In';
+  transactionId?: string;
   createdAt: string;
 }
 
@@ -39,6 +43,10 @@ export class BookingService {
 
   createBooking(data: Partial<Booking>): Observable<Booking> {
     return this.http.post<Booking>(this.base, data);
+  }
+
+  checkoutBooking(bookingData: Partial<Booking>, paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In'): Observable<Booking> {
+    return this.http.post<Booking>(`${this.base}/checkout`, { booking: bookingData, paymentMethod });
   }
 
   updateBooking(id: string, data: Partial<Booking>): Observable<Booking> {

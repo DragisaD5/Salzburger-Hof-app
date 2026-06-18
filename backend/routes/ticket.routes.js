@@ -10,6 +10,7 @@ router.get('/', protect, async (req, res) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.priority) filter.priority = req.query.priority;
     if (req.query.roomNumber) filter.roomNumber = Number(req.query.roomNumber);
+    if (req.query.type) filter.type = req.query.type;
 
     const tickets = await Ticket.find(filter)
       .populate('assignedTo', 'displayName username role')
@@ -23,10 +24,13 @@ router.get('/', protect, async (req, res) => {
 // GET /api/tickets/stats
 router.get('/stats', protect, restrictTo('Admin', 'Maintenance'), async (req, res) => {
   try {
-    const open = await Ticket.countDocuments({ status: 'Open' });
-    const inProgress = await Ticket.countDocuments({ status: 'In Progress' });
-    const resolved = await Ticket.countDocuments({ status: 'Resolved' });
-    const urgent = await Ticket.countDocuments({ priority: 'URGENT', status: { $ne: 'Resolved' } });
+    const filter = {};
+    if (req.query.type) filter.type = req.query.type;
+
+    const open = await Ticket.countDocuments({ ...filter, status: 'Open' });
+    const inProgress = await Ticket.countDocuments({ ...filter, status: 'In Progress' });
+    const resolved = await Ticket.countDocuments({ ...filter, status: 'Resolved' });
+    const urgent = await Ticket.countDocuments({ ...filter, priority: 'URGENT', status: { $ne: 'Resolved' } });
     res.json({ open, inProgress, resolved, urgent });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -58,8 +62,8 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// PUT /api/tickets/:id — Admin, Maintenance
-router.put('/:id', protect, restrictTo('Admin', 'Maintenance'), async (req, res) => {
+// PUT /api/tickets/:id — Admin, Maintenance, Receptionist
+router.put('/:id', protect, restrictTo('Admin', 'Maintenance', 'Receptionist'), async (req, res) => {
   try {
     const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -72,8 +76,8 @@ router.put('/:id', protect, restrictTo('Admin', 'Maintenance'), async (req, res)
   }
 });
 
-// PATCH /api/tickets/:id/resolve
-router.patch('/:id/resolve', protect, restrictTo('Admin', 'Maintenance'), async (req, res) => {
+// PATCH /api/tickets/:id/resolve — Admin, Maintenance, Receptionist
+router.patch('/:id/resolve', protect, restrictTo('Admin', 'Maintenance', 'Receptionist'), async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });

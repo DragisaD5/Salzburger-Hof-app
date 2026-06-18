@@ -1,274 +1,227 @@
-<!-- ═══════════════════════════════════════════════════════════════
-     RECEPTIONIST DASHBOARD — Alpine Warmth Design System
-     Luxury Hotel Front Desk Interface
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     RECEPTIONIST DASHBOARD — Salzburger Hof Premium Design
+     ═══════════════════════════════════════════════════════════ -->
 
-<div class="dashboard-layout">
+<div class="rc-layout">
 
-  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
   <header class="dashboard-header">
-    <div class="dashboard-logo">
-      <span class="logo-emblem">⌂</span>
-      <div class="logo-text">
-        <span class="logo-name">Grand Élite</span>
-        <span class="logo-sub">Hotel Management</span>
-      </div>
+    <div class="header-brand">
+      <div class="header-logo">Salzburger Hof <span class="logo-star">✦</span></div>
+      <div class="header-role-badge">Reception</div>
     </div>
-
-    <nav class="header-center">
-      <span class="header-date">{{ today }}</span>
-    </nav>
-
-    <div class="dashboard-user">
-      <div class="user-avatar">
-        <span>{{ user?.displayName?.charAt(0) ?? 'R' }}</span>
+    <div class="header-center">
+      <div class="rc-live-date">{{ today }}</div>
+    </div>
+    <div class="header-right">
+      <div class="header-avatar">{{ user?.displayName?.charAt(0)?.toUpperCase() ?? 'R' }}</div>
+      <div class="header-user-info">
+        <span class="header-user-name">{{ user?.displayName ?? 'Receptionist' }}</span>
+        <span class="header-user-role">Front Desk</span>
       </div>
-      <div class="user-details">
-        <span class="user-name">{{ user?.displayName ?? 'Receptionist' }}</span>
-        <span class="role-pill">🏨 Front Desk</span>
-      </div>
-      <button class="btn btn-ghost btn-sm logout-btn" (click)="logout()">
-        <span>⎋</span> Sign Out
-      </button>
+      <button class="btn btn-ghost btn-sm" id="receptionist-logout-btn" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
-  <!-- ─── MAIN CONTENT ────────────────────────────────────────────── -->
-  <main class="dashboard-content">
+  <!-- ── MAIN ───────────────────────────────────────────────── -->
+  <main class="rc-main">
 
-    <!-- ─── LOADING STATE ──────────────────────────────────────────── -->
     @if (loading()) {
-      <div class="loading-center">
+      <div class="rc-loading">
         <div class="spinner"></div>
-        <p class="loading-text">Preparing your front desk…</p>
+        <p class="rc-loading-text">Loading front desk data…</p>
       </div>
     } @else {
 
-      <!-- ─── OCCUPANCY HERO BAR ──────────────────────────────────── -->
-      <section class="occupancy-hero">
-        <div class="occupancy-header">
-          <div class="occupancy-title">
-            <h1 class="hero-headline">Room Occupancy</h1>
-            <p class="hero-sub">Live overview · {{ stats()?.total ?? 0 }} rooms total</p>
-          </div>
-          <div class="occupancy-meta">
-            @if (pendingCount() > 0) {
-              <div class="pending-alert">
-                <span class="pending-dot"></span>
-                <span>{{ pendingCount() }} reservation{{ pendingCount() === 1 ? '' : 's' }} awaiting approval</span>
-              </div>
-            }
-          </div>
+      <!-- ── OCCUPANCY HERO ─────────────────────────────────── -->
+      <section class="rc-hero">
+        <!-- Left: headline + pending alert -->
+        <div class="rc-hero-left">
+          <h1 class="rc-hero-title">Room Overview</h1>
+          <p class="rc-hero-sub">{{ stats()?.total ?? 0 }} rooms · live status</p>
+          @if (pendingCount() > 0) {
+            <div class="rc-pending-chip">
+              <span class="rc-pending-dot"></span>
+              {{ pendingCount() }} reservation{{ pendingCount() === 1 ? '' : 's' }} pending approval
+            </div>
+          }
         </div>
 
-        <!-- Big stat numbers -->
-        <div class="stat-grid occupancy-stats">
-          <div class="stat-card stat-free">
-            <div class="stat-icon">🟢</div>
-            <div class="stat-number">{{ stats()?.free ?? 0 }}</div>
-            <div class="stat-label">Available</div>
+        <!-- Right: stat cards -->
+        <div class="rc-stat-cards">
+          <div class="rc-stat rc-stat--free">
+            <div class="rc-stat-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <span class="rc-stat-num">{{ stats()?.free ?? 0 }}</span>
+            <span class="rc-stat-lbl">Available</span>
           </div>
-          <div class="stat-card stat-occupied">
-            <div class="stat-icon">🔴</div>
-            <div class="stat-number">{{ stats()?.occupied ?? 0 }}</div>
-            <div class="stat-label">Occupied</div>
+          <div class="rc-stat rc-stat--occupied">
+            <div class="rc-stat-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="rc-stat-num">{{ stats()?.occupied ?? 0 }}</span>
+            <span class="rc-stat-lbl">Occupied</span>
           </div>
-          <div class="stat-card stat-cleaning">
-            <div class="stat-icon">🧹</div>
-            <div class="stat-number">{{ stats()?.cleaning ?? 0 }}</div>
-            <div class="stat-label">Cleaning</div>
+          <div class="rc-stat rc-stat--cleaning">
+            <div class="rc-stat-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+            </div>
+            <span class="rc-stat-num">{{ stats()?.cleaning ?? 0 }}</span>
+            <span class="rc-stat-lbl">Cleaning</span>
           </div>
-          <div class="stat-card stat-dirty">
-            <div class="stat-icon">⚠️</div>
-            <div class="stat-number">{{ stats()?.dirty ?? 0 }}</div>
-            <div class="stat-label">Needs Attention</div>
+          <div class="rc-stat rc-stat--dirty">
+            <div class="rc-stat-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <span class="rc-stat-num">{{ stats()?.dirty ?? 0 }}</span>
+            <span class="rc-stat-lbl">Attention</span>
           </div>
-          <div class="stat-card stat-vip">
-            <div class="stat-icon">⭐</div>
-            <div class="stat-number">{{ stats()?.vip ?? 0 }}</div>
-            <div class="stat-label">VIP Rooms</div>
+          <div class="rc-stat rc-stat--vip">
+            <div class="rc-stat-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <span class="rc-stat-num">{{ stats()?.vip ?? 0 }}</span>
+            <span class="rc-stat-lbl">VIP Rooms</span>
           </div>
         </div>
 
         <!-- Segmented occupancy bar -->
-        <div class="occupancy-bar-container">
-          <div class="occupancy-bar-label">
-            <span>Occupancy Rate</span>
-            <span class="occupancy-pct">
-              {{ stats()?.total ? (((stats()!.occupied) / stats()!.total) * 100).toFixed(0) : 0 }}%
-            </span>
+        @if (stats() && (stats()!.total > 0)) {
+          <div class="rc-occ-bar-wrap">
+            <div class="rc-occ-bar">
+              <div class="rc-occ-seg rc-occ-seg--occupied" [style.flex]="stats()!.occupied"></div>
+              <div class="rc-occ-seg rc-occ-seg--cleaning" [style.flex]="stats()!.cleaning"></div>
+              <div class="rc-occ-seg rc-occ-seg--dirty"    [style.flex]="stats()!.dirty"></div>
+              <div class="rc-occ-seg rc-occ-seg--free"     [style.flex]="stats()!.free"></div>
+            </div>
+            <div class="rc-occ-legend">
+              <span><span class="rc-dot rc-dot--occupied"></span>Occupied {{ stats()!.occupied }}</span>
+              <span><span class="rc-dot rc-dot--cleaning"></span>Cleaning {{ stats()!.cleaning }}</span>
+              <span><span class="rc-dot rc-dot--dirty"></span>Attention {{ stats()!.dirty }}</span>
+              <span><span class="rc-dot rc-dot--free"></span>Free {{ stats()!.free }}</span>
+            </div>
           </div>
-          <div class="occupancy-bar">
-            @if (stats()) {
-              <div class="bar-segment seg-occupied"
-                   [style.width.%]="(stats()!.occupied / stats()!.total) * 100"
-                   title="Occupied: {{ stats()!.occupied }}">
-              </div>
-              <div class="bar-segment seg-cleaning"
-                   [style.width.%]="(stats()!.cleaning / stats()!.total) * 100"
-                   title="Cleaning: {{ stats()!.cleaning }}">
-              </div>
-              <div class="bar-segment seg-dirty"
-                   [style.width.%]="(stats()!.dirty / stats()!.total) * 100"
-                   title="Dirty: {{ stats()!.dirty }}">
-              </div>
-              <div class="bar-segment seg-free"
-                   [style.width.%]="(stats()!.free / stats()!.total) * 100"
-                   title="Free: {{ stats()!.free }}">
-              </div>
-            }
-          </div>
-          <div class="bar-legend">
-            <span class="legend-item"><span class="legend-dot dot-occupied"></span>Occupied</span>
-            <span class="legend-item"><span class="legend-dot dot-cleaning"></span>Cleaning</span>
-            <span class="legend-item"><span class="legend-dot dot-dirty"></span>Needs Attention</span>
-            <span class="legend-item"><span class="legend-dot dot-free"></span>Available</span>
-          </div>
-        </div>
+        }
       </section>
 
-      <!-- ─── TABS ────────────────────────────────────────────────── -->
-      <div class="tabs receptionist-tabs">
-        <button class="tab-btn" [class.active]="activeTab() === 'rooms'" (click)="activeTab.set('rooms')">
-          <span>🏠</span> Room Map
+      <!-- ── TABS ───────────────────────────────────────────── -->
+      <nav class="rc-tabs">
+        <button class="rc-tab" [class.rc-tab--active]="activeTab() === 'rooms'" (click)="activeTab.set('rooms')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Room Map
         </button>
-        <button class="tab-btn" [class.active]="activeTab() === 'reservations'" (click)="activeTab.set('reservations')">
-          <span>📋</span> Reservations
-          @if (pendingCount() > 0) {
-            <span class="tab-badge">{{ pendingCount() }}</span>
-          }
+        <button class="rc-tab" [class.rc-tab--active]="activeTab() === 'reservations'" (click)="activeTab.set('reservations')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Reservations
+          @if (pendingCount() > 0) { <span class="rc-tab-badge">{{ pendingCount() }}</span> }
         </button>
-        <button class="tab-btn" [class.active]="activeTab() === 'walkin'" (click)="activeTab.set('walkin')">
-          <span>🚶</span> Walk-In
+        <button class="rc-tab" [class.rc-tab--active]="activeTab() === 'walkin'" (click)="activeTab.set('walkin')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Walk-In
         </button>
-      </div>
+        <button class="rc-tab" [class.rc-tab--active]="activeTab() === 'verifications'" (click)="activeTab.set('verifications')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Guest Verifications
+          @if (pendingGuests().length > 0) { <span class="rc-tab-badge" style="background: var(--danger);">{{ pendingGuests().length }}</span> }
+        </button>
+        <button class="rc-tab" [class.rc-tab--active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Room Service & Concierge
+          @if (activeOrdersCount() > 0) { <span class="rc-tab-badge" style="background: var(--accent-amber);">{{ activeOrdersCount() }}</span> }
+        </button>
+      </nav>
 
-      <!-- ════════════════════════════════════════════════════════════
-           TAB: ROOMS
-           ════════════════════════════════════════════════════════════ -->
+      <!-- ══════════════ TAB: ROOMS ══════════════ -->
       @if (activeTab() === 'rooms') {
-        <section class="tab-panel rooms-panel">
-
-          <!-- Filter pills -->
-          <div class="filter-bar">
-            <span class="filter-label">Filter by status:</span>
-            <div class="filter-pills">
-              <button class="filter-pill"
-                      [class.active]="statusFilter() === ''"
-                      (click)="statusFilter.set('')">
-                All Rooms
-              </button>
+        <section class="rc-panel">
+          <!-- Filter bar -->
+          <div class="rc-filter-bar">
+            <div class="rc-filter-pills">
+              <button class="rc-pill" [class.rc-pill--active]="statusFilter() === ''" (click)="statusFilter.set('')">All Rooms</button>
               @for (s of statuses; track s) {
-                <button class="filter-pill"
-                        [class.active]="statusFilter() === s"
-                        [class]="'filter-pill filter-pill-' + s.toLowerCase()"
-                        (click)="statusFilter.set(s)">
-                  {{ s }}
-                </button>
+                <button class="rc-pill rc-pill--{{ s.toLowerCase() }}" [class.rc-pill--active]="statusFilter() === s" (click)="statusFilter.set(s)">{{ s }}</button>
               }
             </div>
-            <span class="filter-count">{{ filteredRooms().length }} room{{ filteredRooms().length === 1 ? '' : 's' }}</span>
+            <span class="rc-filter-count">{{ filteredRooms().length }} room{{ filteredRooms().length === 1 ? '' : 's' }}</span>
           </div>
 
-          <!-- Floor 1: Rooms 101–125 -->
+          <!-- Floor groups -->
           @if (floor1Rooms().length > 0) {
-            <div class="floor-group">
-              <div class="floor-separator">
-                <span class="floor-label">🏢 FLOOR 1</span>
-                <span class="floor-count">{{ floor1Rooms().length }} rooms</span>
-              </div>
-              <div class="room-grid">
+            <div class="rc-floor-group">
+              <div class="rc-floor-header"><span class="rc-floor-label">Floor 1</span><span class="rc-floor-count">{{ floor1Rooms().length }} rooms</span></div>
+              <div class="rc-room-grid">
                 @for (room of floor1Rooms(); track room._id) {
-                  <div class="room-card" [class]="getRoomStatusClass(room.status)">
-                    @if (room.isVIP) { <span class="vip-star">⭐</span> }
-                    <div class="room-number">{{ room.roomNumber }}</div>
-                    <div class="room-category">{{ room.category }}</div>
-                    <span [class]="'badge badge-' + room.status.toLowerCase()">{{ room.status }}</span>
-                    <div class="room-price">${{ room.pricePerNight }}<span>/night</span></div>
+                  <div class="rc-room-card rc-room-card--{{ room.status.toLowerCase() }}">
+                    @if (room.isVIP) { <span class="rc-vip-star">✦</span> }
+                    <div class="rc-room-num">{{ room.roomNumber }}</div>
+                    <div class="rc-room-cat">{{ room.category }}</div>
+                    <div class="rc-room-status-dot rc-room-status-dot--{{ room.status.toLowerCase() }}"></div>
+                    <div class="rc-room-price">${{ room.pricePerNight }}<span>/nt</span></div>
                   </div>
                 }
               </div>
             </div>
           }
-
-          <!-- Floor 2: Rooms 126–150 -->
           @if (floor2Rooms().length > 0) {
-            <div class="floor-group">
-              <div class="floor-separator">
-                <span class="floor-label">🏢 FLOOR 2</span>
-                <span class="floor-count">{{ floor2Rooms().length }} rooms</span>
-              </div>
-              <div class="room-grid">
+            <div class="rc-floor-group">
+              <div class="rc-floor-header"><span class="rc-floor-label">Floor 2</span><span class="rc-floor-count">{{ floor2Rooms().length }} rooms</span></div>
+              <div class="rc-room-grid">
                 @for (room of floor2Rooms(); track room._id) {
-                  <div class="room-card" [class]="getRoomStatusClass(room.status)">
-                    @if (room.isVIP) { <span class="vip-star">⭐</span> }
-                    <div class="room-number">{{ room.roomNumber }}</div>
-                    <div class="room-category">{{ room.category }}</div>
-                    <span [class]="'badge badge-' + room.status.toLowerCase()">{{ room.status }}</span>
-                    <div class="room-price">${{ room.pricePerNight }}<span>/night</span></div>
+                  <div class="rc-room-card rc-room-card--{{ room.status.toLowerCase() }}">
+                    @if (room.isVIP) { <span class="rc-vip-star">✦</span> }
+                    <div class="rc-room-num">{{ room.roomNumber }}</div>
+                    <div class="rc-room-cat">{{ room.category }}</div>
+                    <div class="rc-room-status-dot rc-room-status-dot--{{ room.status.toLowerCase() }}"></div>
+                    <div class="rc-room-price">${{ room.pricePerNight }}<span>/nt</span></div>
                   </div>
                 }
               </div>
             </div>
           }
-
-          <!-- Floor 3: Rooms 151–175 -->
           @if (floor3Rooms().length > 0) {
-            <div class="floor-group">
-              <div class="floor-separator">
-                <span class="floor-label">🏢 FLOOR 3</span>
-                <span class="floor-count">{{ floor3Rooms().length }} rooms</span>
-              </div>
-              <div class="room-grid">
+            <div class="rc-floor-group">
+              <div class="rc-floor-header"><span class="rc-floor-label">Floor 3</span><span class="rc-floor-count">{{ floor3Rooms().length }} rooms</span></div>
+              <div class="rc-room-grid">
                 @for (room of floor3Rooms(); track room._id) {
-                  <div class="room-card" [class]="getRoomStatusClass(room.status)">
-                    @if (room.isVIP) { <span class="vip-star">⭐</span> }
-                    <div class="room-number">{{ room.roomNumber }}</div>
-                    <div class="room-category">{{ room.category }}</div>
-                    <span [class]="'badge badge-' + room.status.toLowerCase()">{{ room.status }}</span>
-                    <div class="room-price">${{ room.pricePerNight }}<span>/night</span></div>
+                  <div class="rc-room-card rc-room-card--{{ room.status.toLowerCase() }}">
+                    @if (room.isVIP) { <span class="rc-vip-star">✦</span> }
+                    <div class="rc-room-num">{{ room.roomNumber }}</div>
+                    <div class="rc-room-cat">{{ room.category }}</div>
+                    <div class="rc-room-status-dot rc-room-status-dot--{{ room.status.toLowerCase() }}"></div>
+                    <div class="rc-room-price">${{ room.pricePerNight }}<span>/nt</span></div>
                   </div>
                 }
               </div>
             </div>
           }
-
-          <!-- Floor 4: Rooms 176–200 -->
           @if (floor4Rooms().length > 0) {
-            <div class="floor-group">
-              <div class="floor-separator">
-                <span class="floor-label">🏢 FLOOR 4</span>
-                <span class="floor-count">{{ floor4Rooms().length }} rooms</span>
-              </div>
-              <div class="room-grid">
+            <div class="rc-floor-group">
+              <div class="rc-floor-header"><span class="rc-floor-label">Floor 4</span><span class="rc-floor-count">{{ floor4Rooms().length }} rooms</span></div>
+              <div class="rc-room-grid">
                 @for (room of floor4Rooms(); track room._id) {
-                  <div class="room-card" [class]="getRoomStatusClass(room.status)">
-                    @if (room.isVIP) { <span class="vip-star">⭐</span> }
-                    <div class="room-number">{{ room.roomNumber }}</div>
-                    <div class="room-category">{{ room.category }}</div>
-                    <span [class]="'badge badge-' + room.status.toLowerCase()">{{ room.status }}</span>
-                    <div class="room-price">${{ room.pricePerNight }}<span>/night</span></div>
+                  <div class="rc-room-card rc-room-card--{{ room.status.toLowerCase() }}">
+                    @if (room.isVIP) { <span class="rc-vip-star">✦</span> }
+                    <div class="rc-room-num">{{ room.roomNumber }}</div>
+                    <div class="rc-room-cat">{{ room.category }}</div>
+                    <div class="rc-room-status-dot rc-room-status-dot--{{ room.status.toLowerCase() }}"></div>
+                    <div class="rc-room-price">${{ room.pricePerNight }}<span>/nt</span></div>
                   </div>
                 }
               </div>
             </div>
           }
-
-          <!-- Floor 5: Rooms 201–205 (Penthouse Level) -->
           @if (floor5Rooms().length > 0) {
-            <div class="floor-group floor-penthouse">
-              <div class="floor-separator">
-                <span class="floor-label">✨ FLOOR 5 — PENTHOUSE LEVEL</span>
-                <span class="floor-count">{{ floor5Rooms().length }} rooms</span>
-              </div>
-              <div class="room-grid">
+            <div class="rc-floor-group rc-floor-group--penthouse">
+              <div class="rc-floor-header"><span class="rc-floor-label">✦ Floor 5 — Penthouse</span><span class="rc-floor-count">{{ floor5Rooms().length }} rooms</span></div>
+              <div class="rc-room-grid">
                 @for (room of floor5Rooms(); track room._id) {
-                  <div class="room-card" [class]="getRoomStatusClass(room.status)">
-                    @if (room.isVIP) { <span class="vip-star">⭐</span> }
-                    <div class="room-number">{{ room.roomNumber }}</div>
-                    <div class="room-category">{{ room.category }}</div>
-                    <span [class]="'badge badge-' + room.status.toLowerCase()">{{ room.status }}</span>
-                    <div class="room-price">${{ room.pricePerNight }}<span>/night</span></div>
+                  <div class="rc-room-card rc-room-card--{{ room.status.toLowerCase() }}">
+                    @if (room.isVIP) { <span class="rc-vip-star">✦</span> }
+                    <div class="rc-room-num">{{ room.roomNumber }}</div>
+                    <div class="rc-room-cat">{{ room.category }}</div>
+                    <div class="rc-room-status-dot rc-room-status-dot--{{ room.status.toLowerCase() }}"></div>
+                    <div class="rc-room-price">${{ room.pricePerNight }}<span>/nt</span></div>
                   </div>
                 }
               </div>
@@ -276,102 +229,131 @@
           }
 
           @if (filteredRooms().length === 0) {
-            <div class="empty-state">
-              <div class="empty-icon">🔍</div>
+            <div class="rc-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <h3>No rooms match this filter</h3>
-              <p>Try selecting a different status or view all rooms.</p>
-              <button class="btn btn-outline" (click)="statusFilter.set('')">Show All Rooms</button>
+              <p>Try a different status or view all rooms.</p>
+              <button class="btn btn-outline" (click)="statusFilter.set('')">Show All</button>
             </div>
           }
         </section>
       }
 
-      <!-- ════════════════════════════════════════════════════════════
-           TAB: RESERVATIONS
-           ════════════════════════════════════════════════════════════ -->
+      <!-- ══════════════ TAB: RESERVATIONS ══════════════ -->
       @if (activeTab() === 'reservations') {
-        <section class="tab-panel reservations-panel">
-          <div class="section-header">
-            <h2>Reservations</h2>
-            <span class="section-meta">{{ bookings().length }} total · {{ pendingCount() }} pending</span>
+        <section class="rc-panel">
+          <div class="rc-section-header">
+            <h2 class="rc-section-title">Reservations</h2>
+            <span class="rc-section-meta">{{ bookings().length }} total &nbsp;·&nbsp; {{ pendingCount() }} pending</span>
           </div>
 
           @if (bookings().length === 0) {
-            <div class="empty-state">
-              <div class="empty-icon">📭</div>
-              <h3>No reservations found</h3>
-              <p>New reservations will appear here as they come in.</p>
+            <div class="rc-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <h3>No reservations yet</h3>
+              <p>New bookings will appear here as they come in.</p>
             </div>
           } @else {
-            <div class="table-wrapper">
-              <table class="data-table reservations-table">
+            <div class="rc-table-wrap">
+              <table class="rc-table">
                 <thead>
                   <tr>
                     <th>Guest</th>
                     <th>Room</th>
                     <th>Type</th>
+                    <th>Add-ons</th>
                     <th>Check-In</th>
                     <th>Check-Out</th>
                     <th>Nights</th>
                     <th>Total</th>
                     <th>Source</th>
+                    <th>Payment</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (booking of bookings(); track booking._id) {
-                    <tr [class.row-pending]="booking.status === 'Pending'"
-                        [class.row-active]="booking.status === 'Active'">
-                      <td class="guest-cell">
-                        <div class="guest-avatar">
-                          {{ booking.guestName.charAt(0).toUpperCase() }}
-                        </div>
-                        <div class="guest-info">
-                          <span class="guest-name">{{ booking.guestName }}</span>
-                          <span class="guest-email">{{ booking.guestEmail }}</span>
-                        </div>
-                      </td>
-                      <td class="room-cell">
-                        <span class="room-badge">{{ booking.roomNumber ?? '—' }}</span>
-                      </td>
-                      <td>{{ booking.roomType }}</td>
-                      <td class="date-cell">
-                        <span class="date-value">{{ booking.checkIn | date:'MMM d' }}</span>
-                        <span class="date-year">{{ booking.checkIn | date:'yyyy' }}</span>
-                      </td>
-                      <td class="date-cell">
-                        <span class="date-value">{{ booking.checkOut | date:'MMM d' }}</span>
-                        <span class="date-year">{{ booking.checkOut | date:'yyyy' }}</span>
-                      </td>
-                      <td class="nights-cell">
-                        <span class="nights-badge">
-                          {{ nightCount(booking.checkIn, booking.checkOut) }}N
-                        </span>
-                      </td>
-                      <td class="price-cell">${{ booking.totalPrice | number:'1.0-0' }}</td>
+                    <tr [class.rc-row--pending]="booking.status === 'Pending'"
+                        [class.rc-row--active]="booking.status === 'Active'">
                       <td>
-                        <span class="source-tag">{{ booking.source }}</span>
+                        <div class="rc-guest-cell">
+                          <div class="rc-guest-avatar">{{ booking.guestName.charAt(0).toUpperCase() }}</div>
+                          <div>
+                            <div class="rc-guest-name">{{ booking.guestName }}</div>
+                            <div class="rc-guest-email">{{ booking.guestEmail }}</div>
+                          </div>
+                        </div>
                       </td>
                       <td>
-                        <span [class]="getBookingBadge(booking.status)">{{ booking.status }}</span>
+                        @if (booking.status === 'Confirmed' || booking.status === 'Pending') {
+                          <select class="form-input" style="padding: 4px; font-size: 11px; width: 90px; height: auto; display: inline-block; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border);"
+                                  [ngModel]="booking.roomNumber" (ngModelChange)="assignRoom(booking, $event)">
+                            <option [ngValue]="null">Select Rm</option>
+                            @for (room of getAvailableRoomsForType(booking.roomType); track room._id) {
+                              <option [ngValue]="room.roomNumber">RM {{ room.roomNumber }}</option>
+                            }
+                          </select>
+                        } @else {
+                          <span class="rc-room-badge">{{ booking.roomNumber ?? '—' }}</span>
+                        }
                       </td>
-                      <td class="actions-cell">
+                      <td><span class="rc-type-tag">{{ booking.roomType }}</span></td>
+                      <td>
+                        <div class="rc-addons-list">
+                          @for (addon of booking.addons || []; track addon) {
+                            <span class="badge" [class.badge-addon-spa]="addon === 'Spa Access'"
+                                                [class.badge-addon-ski]="addon === 'Ski Pass'"
+                                                [class.badge-addon-dining]="addon === 'Fine Dining'">
+                              {{ addon }}
+                            </span>
+                          }
+                          @if (!booking.addons || booking.addons.length === 0) {
+                            <span class="rc-no-addons">—</span>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <div class="rc-date-cell">
+                          <span class="rc-date-main">{{ booking.checkIn | date:'MMM d' }}</span>
+                          <span class="rc-date-yr">{{ booking.checkIn | date:'yyyy' }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="rc-date-cell">
+                          <span class="rc-date-main">{{ booking.checkOut | date:'MMM d' }}</span>
+                          <span class="rc-date-yr">{{ booking.checkOut | date:'yyyy' }}</span>
+                        </div>
+                      </td>
+                      <td><span class="rc-nights-badge">{{ nightCount(booking.checkIn, booking.checkOut) }}N</span></td>
+                      <td><span class="rc-price-cell">€{{ booking.totalPrice | number:'1.2-2' }}</span></td>
+                      <td><span class="rc-source-tag">{{ booking.source }}</span></td>
+                      <td>
+                        @if (booking.paymentStatus === 'Paid') {
+                          @if (booking.paymentMethod === 'Card') {
+                            <span class="badge badge-paid-card">PAID (CARD)</span>
+                          } @else if (booking.paymentMethod === 'PayPal') {
+                            <span class="badge badge-paid-paypal">PAID (PAYPAL)</span>
+                          } @else {
+                            <span class="badge badge-paid">PAID</span>
+                          }
+                        } @else {
+                          <span class="badge badge-pay-later">PAY AT CHECK-IN</span>
+                        }
+                      </td>
+                      <td><span [class]="getBookingBadge(booking.status) + ' badge'">{{ booking.status }}</span></td>
+                      <td class="rc-action-cell">
                         @if (booking.status === 'Pending') {
-                          <button class="btn btn-primary btn-sm" (click)="approveBooking(booking)">
-                            ✓ Confirm
-                          </button>
+                          <button class="btn btn-primary btn-sm" (click)="approveBooking(booking)">Confirm</button>
                         }
                         @if (booking.status === 'Confirmed') {
-                          <button class="btn btn-amber btn-sm" (click)="activateBooking(booking)">
-                            🔑 Check In
-                          </button>
+                          <button class="btn btn-amber btn-sm" (click)="activateBooking(booking)">Check In</button>
                         }
                         @if (booking.status === 'Active') {
-                          <span class="active-label">✅ Checked In</span>
+                          <span class="rc-checked-in">✓ In</span>
                         }
                         @if (booking.status === 'Cancelled') {
-                          <span class="cancelled-label">✕ Cancelled</span>
+                          <span class="rc-cancelled">Cancelled</span>
                         }
                       </td>
                     </tr>
@@ -383,256 +365,317 @@
         </section>
       }
 
-      <!-- ════════════════════════════════════════════════════════════
-           TAB: WALK-IN
-           ════════════════════════════════════════════════════════════ -->
+      <!-- ══════════════ TAB: WALK-IN ══════════════ -->
       @if (activeTab() === 'walkin') {
-        <section class="tab-panel walkin-panel">
+        <section class="rc-panel rc-walkin-panel">
+          <div class="rc-walkin-grid">
 
-          <div class="walkin-layout">
-            <!-- Walk-in form card -->
-            <div class="walkin-form-card">
-              <div class="walkin-header">
-                <div class="walkin-icon">🚶</div>
+            <!-- Form card -->
+            <div class="rc-form-card">
+              <div class="rc-form-header">
                 <div>
-                  <h2 class="walkin-title">New Walk-In Reservation</h2>
-                  <p class="walkin-subtitle">Complete all fields to register a walk-in guest</p>
+                  <h2 class="rc-form-title">New Walk-In Guest</h2>
+                  <p class="rc-form-sub">Register a guest arriving without a prior reservation</p>
                 </div>
               </div>
 
-              <form (ngSubmit)="submitWalkIn()" #walkInNgForm="ngForm">
-
-                <!-- Section: Guest Information -->
-                <div class="form-section">
-                  <div class="form-section-title">
-                    <span class="section-num">01</span>
-                    <span>Guest Information</span>
-                  </div>
-                  <div class="form-grid-3">
+              <form (ngSubmit)="submitWalkIn()">
+                <div class="rc-form-section">
+                  <div class="rc-form-section-label"><span class="rc-sec-num">01</span> Guest Information</div>
+                  <div class="rc-form-3col">
                     <div class="form-group">
-                      <label class="form-label" for="guestName">Full Name *</label>
-                      <input class="form-input"
-                             id="guestName"
-                             type="text"
-                             placeholder="e.g. John Fitzgerald"
-                             [(ngModel)]="walkInForm.guestName"
-                             name="guestName"
-                             required />
+                      <label class="form-label">Full Name *</label>
+                      <input class="form-input" type="text" placeholder="John Fitzgerald" [(ngModel)]="walkInForm.guestName" name="guestName" required />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="guestEmail">Email Address *</label>
-                      <input class="form-input"
-                             id="guestEmail"
-                             type="email"
-                             placeholder="guest@example.com"
-                             [(ngModel)]="walkInForm.guestEmail"
-                             name="guestEmail"
-                             required />
+                      <label class="form-label">Email Address</label>
+                      <input class="form-input" type="email" placeholder="guest@example.com" [(ngModel)]="walkInForm.guestEmail" name="guestEmail" />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="guestPhone">Phone Number</label>
-                      <input class="form-input"
-                             id="guestPhone"
-                             type="tel"
-                             placeholder="+1 (555) 000-0000"
-                             [(ngModel)]="walkInForm.guestPhone"
-                             name="guestPhone" />
+                      <label class="form-label">Phone</label>
+                      <input class="form-input" type="tel" placeholder="+43 (0)662…" [(ngModel)]="walkInForm.guestPhone" name="guestPhone" />
                     </div>
                   </div>
                 </div>
 
-                <!-- Section: Stay Details -->
-                <div class="form-section">
-                  <div class="form-section-title">
-                    <span class="section-num">02</span>
-                    <span>Stay Details</span>
-                  </div>
-                  <div class="form-grid-3">
+                <div class="rc-form-section">
+                  <div class="rc-form-section-label"><span class="rc-sec-num">02</span> Stay Details</div>
+                  <div class="rc-form-3col">
                     <div class="form-group">
-                      <label class="form-label" for="checkIn">Check-In Date *</label>
-                      <input class="form-input"
-                             id="checkIn"
-                             type="date"
-                             [(ngModel)]="walkInForm.checkIn"
-                             name="checkIn"
-                             required />
+                      <label class="form-label">Check-In *</label>
+                      <input class="form-input" type="date" [(ngModel)]="walkInForm.checkIn" name="checkIn" required />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="checkOut">Check-Out Date *</label>
-                      <input class="form-input"
-                             id="checkOut"
-                             type="date"
-                             [(ngModel)]="walkInForm.checkOut"
-                             name="checkOut"
-                             required />
+                      <label class="form-label">Check-Out *</label>
+                      <input class="form-input" type="date" [(ngModel)]="walkInForm.checkOut" name="checkOut" required />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="roomType">Room Type *</label>
-                      <select class="form-input"
-                              id="roomType"
-                              [(ngModel)]="walkInForm.roomType"
-                              name="roomType"
-                              required>
-                        <option value="" disabled>Select type…</option>
+                      <label class="form-label">Room Type *</label>
+                      <select class="form-input" [(ngModel)]="walkInForm.roomType" name="roomType" required>
                         @for (type of roomTypes; track type) {
                           <option [value]="type">{{ type }}</option>
                         }
                       </select>
                     </div>
-                  </div>
-                  <div class="form-grid-3">
                     <div class="form-group">
-                      <label class="form-label" for="roomNumber">Room Number</label>
-                      <input class="form-input"
-                             id="roomNumber"
-                             type="text"
-                             placeholder="Auto-assign if blank"
-                             [(ngModel)]="walkInForm.roomNumber"
-                             name="roomNumber" />
+                      <label class="form-label">Room Number</label>
+                      <input class="form-input" type="text" placeholder="Auto-assign" [(ngModel)]="walkInForm.roomNumber" name="roomNumber" />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="adults">Adults *</label>
-                      <input class="form-input"
-                             id="adults"
-                             type="number"
-                             min="1"
-                             max="6"
-                             placeholder="1"
-                             [(ngModel)]="walkInForm.adults"
-                             name="adults"
-                             required />
+                      <label class="form-label">Adults</label>
+                      <input class="form-input" type="number" min="1" max="6" [(ngModel)]="walkInForm.adults" name="adults" />
                     </div>
                     <div class="form-group">
-                      <label class="form-label" for="children">Children</label>
-                      <input class="form-input"
-                             id="children"
-                             type="number"
-                             min="0"
-                             max="6"
-                             placeholder="0"
-                             [(ngModel)]="walkInForm.children"
-                             name="children" />
+                      <label class="form-label">Children</label>
+                      <input class="form-input" type="number" min="0" max="6" [(ngModel)]="walkInForm.children" name="children" />
                     </div>
                   </div>
                 </div>
 
-                <!-- Section: Special Requests -->
-                <div class="form-section">
-                  <div class="form-section-title">
-                    <span class="section-num">03</span>
-                    <span>Special Requests</span>
-                  </div>
+                <div class="rc-form-section">
+                  <div class="rc-form-section-label"><span class="rc-sec-num">03</span> Special Requests</div>
                   <div class="form-group">
-                    <label class="form-label" for="specialRequests">Notes &amp; Preferences</label>
-                    <textarea class="form-input walkin-textarea"
-                              id="specialRequests"
-                              placeholder="Early check-in, dietary requirements, accessibility needs, special occasions…"
-                              [(ngModel)]="walkInForm.specialRequests"
-                              name="specialRequests"
-                              rows="3">
-                    </textarea>
+                    <textarea class="form-input" rows="3" placeholder="Early check-in, dietary requirements, accessibility, special occasions…" [(ngModel)]="walkInForm.specialRequests" name="specialRequests"></textarea>
                   </div>
                 </div>
 
-                <div class="walkin-actions">
-                  <button type="button" class="btn btn-ghost" (click)="activeTab.set('rooms')">
-                    Cancel
-                  </button>
-                  <button type="submit" class="btn btn-primary walkin-submit">
-                    <span>✓</span> Register Walk-In Guest
+                <div class="rc-form-actions">
+                  <button type="button" class="btn btn-ghost" (click)="activeTab.set('rooms')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Register Guest
                   </button>
                 </div>
               </form>
             </div>
 
-            <!-- Price estimate sidebar -->
-            <div class="price-sidebar">
-              <div class="price-card">
-                <div class="price-card-header">
-                  <span>💰</span>
-                  <h3>Price Estimate</h3>
+            <!-- Price sidebar -->
+            <aside class="rc-price-sidebar">
+              <div class="rc-price-card">
+                <div class="rc-price-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Price Estimate
                 </div>
-
-                <div class="price-breakdown">
-                  <div class="price-row">
-                    <span class="price-row-label">Room Type</span>
-                    <span class="price-row-value">{{ walkInForm.roomType || '—' }}</span>
+                <div class="rc-price-rows">
+                  <div class="rc-price-row"><span>Type</span><strong>{{ walkInForm.roomType || '—' }}</strong></div>
+                  <div class="rc-price-row"><span>Check-in</span><strong>{{ walkInForm.checkIn || '—' }}</strong></div>
+                  <div class="rc-price-row"><span>Check-out</span><strong>{{ walkInForm.checkOut || '—' }}</strong></div>
+                  <div class="rc-price-row"><span>Guests</span><strong>{{ (walkInForm.adults || 0) + (walkInForm.children || 0) }} person(s)</strong></div>
+                </div>
+                <div class="rc-price-divider"></div>
+                <div class="rc-price-total-block">
+                  <div class="rc-nights-display">
+                    <span class="rc-nights-num">{{ walkInForm.checkIn && walkInForm.checkOut ? nightCount(walkInForm.checkIn, walkInForm.checkOut) : 0 }}</span>
+                    <span class="rc-nights-label">nights</span>
                   </div>
-                  <div class="price-row">
-                    <span class="price-row-label">Check-In</span>
-                    <span class="price-row-value">{{ walkInForm.checkIn || '—' }}</span>
-                  </div>
-                  <div class="price-row">
-                    <span class="price-row-label">Check-Out</span>
-                    <span class="price-row-value">{{ walkInForm.checkOut || '—' }}</span>
-                  </div>
-                  <div class="price-row">
-                    <span class="price-row-label">Guests</span>
-                    <span class="price-row-value">
-                      {{ (walkInForm.adults || 0) + (walkInForm.children || 0) }} person(s)
-                    </span>
+                  <div class="rc-total-right">
+                    <span class="rc-total-label">Estimated Total</span>
+                    <span class="rc-total-value">${{ estimatedTotal() | number:'1.0-0' }}</span>
                   </div>
                 </div>
-
-                <div class="price-divider"></div>
-
-                <div class="price-estimate-block">
-                  <div class="price-nights">
-                    <span class="price-nights-num">
-                      {{ walkInForm.checkIn && walkInForm.checkOut
-                          ? nightCount(walkInForm.checkIn, walkInForm.checkOut)
-                          : 0 }}
-                    </span>
-                    <span class="price-nights-label">nights</span>
-                  </div>
-                  <div class="price-total-block">
-                    <span class="price-total-label">Estimated Total</span>
-                    <span class="price-total-value">
-                      ${{ estimatedTotal() | number:'1.0-0' }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="price-note">
-                  * Estimate based on base nightly rate. Final price may vary with taxes &amp; fees.
-                </div>
-
-                <!-- Amenities reminder -->
-                <div class="amenities-list">
-                  <div class="amenity-item">✅ Free Wi-Fi</div>
-                  <div class="amenity-item">✅ Daily Housekeeping</div>
-                  <div class="amenity-item">✅ 24h Concierge</div>
-                  <div class="amenity-item">✅ Complimentary Breakfast</div>
+                <p class="rc-price-note">* Base rate only. Taxes & fees may apply.</p>
+                <div class="rc-amenities">
+                  <div class="rc-amenity"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Free Wi-Fi</div>
+                  <div class="rc-amenity"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Daily Housekeeping</div>
+                  <div class="rc-amenity"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 24h Concierge</div>
+                  <div class="rc-amenity"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Complimentary Breakfast</div>
                 </div>
               </div>
 
-              <!-- Quick room availability -->
-              <div class="quick-availability">
-                <div class="qa-header">🏠 Quick Availability</div>
-                <div class="qa-stats">
-                  <div class="qa-stat qa-free">
-                    <span class="qa-num">{{ stats()?.free ?? 0 }}</span>
-                    <span class="qa-label">Available Now</span>
+              <!-- Quick availability -->
+              <div class="rc-qa-card">
+                <div class="rc-qa-title">Quick Availability</div>
+                <div class="rc-qa-grid">
+                  <div class="rc-qa-item rc-qa-item--free">
+                    <span class="rc-qa-num">{{ stats()?.free ?? 0 }}</span>
+                    <span class="rc-qa-lbl">Available Now</span>
                   </div>
-                  <div class="qa-stat qa-cleaning">
-                    <span class="qa-num">{{ stats()?.cleaning ?? 0 }}</span>
-                    <span class="qa-label">Being Cleaned</span>
+                  <div class="rc-qa-item rc-qa-item--cleaning">
+                    <span class="rc-qa-num">{{ stats()?.cleaning ?? 0 }}</span>
+                    <span class="rc-qa-lbl">Being Cleaned</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
         </section>
       }
 
-    }
+      <!-- ══════════════ TAB: GUEST VERIFICATIONS ══════════════ -->
+      @if (activeTab() === 'verifications') {
+        <section class="rc-panel">
+          <div class="rc-section-header">
+            <h2 class="rc-section-title">Pending Guest Verifications</h2>
+            <span class="rc-section-meta">{{ pendingGuests().length }} guest(s) awaiting approval</span>
+          </div>
+
+          @if (pendingGuests().length === 0) {
+            <div class="rc-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <h3>All Guests Verified</h3>
+              <p>There are no pending registration requests at this time.</p>
+            </div>
+          } @else {
+            <div class="rc-table-wrap">
+              <table class="rc-table">
+                <thead>
+                  <tr>
+                    <th>Guest Details</th>
+                    <th>Room Requested</th>
+                    <th>Registration Email</th>
+                    <th>Booking Email</th>
+                    <th>Phone Number</th>
+                    <th>Verification</th>
+                    <th>Date Registered</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (guest of pendingGuests(); track guest._id) {
+                    <tr>
+                      <td>
+                        <div class="rc-guest-cell">
+                          <div class="rc-guest-avatar" style="background: linear-gradient(135deg, #7c5a1a, #b8762a);">
+                            {{ (guest.displayName || guest.username).charAt(0).toUpperCase() }}
+                          </div>
+                          <div>
+                            <div class="rc-guest-name">{{ guest.displayName }}</div>
+                            <div class="rc-guest-email">{{ '@' }}{{ guest.username }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (guest.roomNumber) {
+                          <span class="rc-room-badge" style="background: rgba(212, 168, 87, 0.15); color: #d4a857; border-color: rgba(212, 168, 87, 0.3);">
+                            Room {{ guest.roomNumber }}
+                          </span>
+                        } @else {
+                          <span class="rc-room-badge">Unassigned</span>
+                        }
+                      </td>
+                      <td><span class="rc-email-text">{{ guest.email }}</span></td>
+                      <td><span class="rc-email-text">{{ guest.bookingEmail || 'No active booking' }}</span></td>
+                      <td><span class="rc-phone-text">{{ guest.phone || '—' }}</span></td>
+                      <td>
+                        @if (guest.email && guest.bookingEmail && guest.email.toLowerCase().trim() === guest.bookingEmail.toLowerCase().trim()) {
+                          <span class="badge badge-match-success">MATCH VERIFIED</span>
+                        } @else {
+                          <span class="badge badge-match-danger">MISMATCH: VERIFY ID</span>
+                        }
+                      </td>
+                      <td>{{ guest.createdAt | date:'mediumDate' }}</td>
+                      <td class="rc-action-cell">
+                        <button class="btn btn-primary btn-sm" style="background: #2ecc71; border-color: #27ae60;" (click)="approveGuest(guest._id)">Approve</button>
+                        <button class="btn btn-sm" style="background: #e74c3c; border-color: #c0392b; color: #fff; margin-left: 8px;" (click)="rejectGuest(guest._id)">Reject</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ══════════════ TAB: ROOM SERVICE & CONCIERGE ══════════════ -->
+      @if (activeTab() === 'orders') {
+        <section class="rc-panel">
+          <div class="rc-section-header">
+            <h2 class="rc-section-title">Room Service & Concierge Orders</h2>
+            <span class="rc-section-meta">{{ orders().length }} total &nbsp;·&nbsp; {{ activeOrdersCount() }} active</span>
+          </div>
+
+          @if (orders().length === 0) {
+            <div class="rc-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <h3>No service requests found</h3>
+              <p>Active guest orders and concierge requests will appear here.</p>
+            </div>
+          } @else {
+            <div class="rc-table-wrap">
+              <table class="rc-table">
+                <thead>
+                  <tr>
+                    <th>Room</th>
+                    <th>Guest</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (order of orders(); track order._id) {
+                    <tr [class.rc-row--pending]="order.status === 'Open'"
+                        [class.rc-row--active]="order.status === 'In Progress'">
+                      <td>
+                        <span class="rc-room-badge" style="background: rgba(212, 168, 87, 0.15); color: #d4a857; border-color: rgba(212, 168, 87, 0.3);">
+                          Room {{ order.roomNumber }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="rc-guest-name" style="font-weight: 600; color: var(--text-primary);">{{ order.reportedBy || 'Guest' }}</div>
+                      </td>
+                      <td>
+                        <span class="rc-type-tag" style="text-transform: uppercase;">{{ order.category }}</span>
+                      </td>
+                      <td>
+                        <div style="white-space: pre-line; font-size: 11px; max-width: 380px; line-height: 1.4; color: var(--text-secondary);">{{ order.description }}</div>
+                      </td>
+                      <td>
+                        <span class="rc-price-cell">€{{ (order.price ?? 0) | number:'1.2-2' }}</span>
+                      </td>
+                      <td>
+                        @if (order.paymentStatus === 'Paid') {
+                          <span class="badge badge-paid" style="background: rgba(46, 204, 113, 0.08); color: #2ecc71; border-color: rgba(46, 204, 113, 0.2);">
+                            PAID ({{ order.paymentMethod?.toUpperCase() }})
+                          </span>
+                        } @else {
+                          <span class="badge badge-pay-later" style="background: rgba(184, 118, 42, 0.08); color: #b8762a; border-color: rgba(184, 118, 42, 0.2);">
+                            ROOM CHARGE
+                          </span>
+                        }
+                      </td>
+                      <td>
+                        <span class="badge" 
+                              [class.badge-pending]="order.status === 'Open'" 
+                              [class.badge-active]="order.status === 'In Progress'" 
+                              [class.badge-confirmed]="order.status === 'Resolved'">
+                          {{ order.status }}
+                        </span>
+                      </td>
+                      <td class="rc-action-cell">
+                        @if (order.status === 'Open') {
+                          <button class="btn btn-sm btn-orange" (click)="acknowledgeOrder(order._id)">Acknowledge</button>
+                          <button class="btn btn-sm btn-green" style="margin-left: 8px;" (click)="fulfillOrder(order._id)">Fulfill</button>
+                        } @else if (order.status === 'In Progress') {
+                          <button class="btn btn-sm btn-green" (click)="fulfillOrder(order._id)">Fulfill</button>
+                        } @else {
+                          <span style="color: #2ecc71; font-weight: 700; font-size: 11px;">✓ Fulfilled</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+
+    } <!-- end @else loading -->
   </main>
 
-  <!-- ─── TOAST NOTIFICATION ──────────────────────────────────────── -->
+  <!-- ── TOAST ──────────────────────────────────────────────── -->
   @if (toast()) {
-    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
-      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
-      <span class="toast-msg">{{ toast() }}</span>
+    <div class="rc-toast" [class.rc-toast--success]="toastType() === 'success'" [class.rc-toast--error]="toastType() === 'error'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        @if (toastType() === 'success') { <polyline points="20 6 9 17 4 12"/> }
+        @else { <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/> }
+      </svg>
+      <span>{{ toast() }}</span>
     </div>
   }
 

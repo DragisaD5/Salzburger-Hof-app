@@ -1,11 +1,20 @@
-﻿<div class="dashboard-layout">
+<div class="dashboard-layout">
   <!-- Header -->
   <header class="dashboard-header">
-    <div class="dashboard-logo">Salzburger Hof</div>
-    <div class="dashboard-user">
-      <span>{{ user?.displayName }}</span>
-      <span class="role-pill">GUEST</span>
-      <button class="btn btn-ghost btn-sm" id="guest-logout-btn" (click)="logout()">LOGOUT</button>
+    <div class="header-brand">
+      <div class="header-logo">Salzburger Hof <span class="logo-star">✦</span></div>
+      <div class="header-role-badge">Guest Portal</div>
+    </div>
+    <div class="header-center">
+      <span class="header-tagline">Your Alpine Experience</span>
+    </div>
+    <div class="header-right">
+      <div class="header-avatar">{{ user?.displayName?.charAt(0)?.toUpperCase() }}</div>
+      <div class="header-user-info">
+        <span class="header-user-name">{{ user?.displayName }}</span>
+        <span class="header-user-role">Room {{ user?.roomNumber }}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="guest-logout-btn" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
@@ -42,77 +51,208 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions">
-      <button
-        class="quick-action-btn"
-        id="guest-new-request-btn"
-        (click)="showTicketForm.set(!showTicketForm())"
-      >
+      <button class="quick-action-btn" [class.active]="activeActionTab() === 'maintenance'" (click)="toggleActionTab('maintenance')">
         <span class="qa-icon">🔧</span>
         <span class="qa-label">MAINTENANCE REQUEST</span>
       </button>
-      <div class="quick-action-btn quick-action-info">
+      <button class="quick-action-btn" [class.active]="activeActionTab() === 'room-service'" (click)="toggleActionTab('room-service')">
         <span class="qa-icon">🛎</span>
         <span class="qa-label">ROOM SERVICE</span>
-        <span class="qa-sub">Call Ext. 0</span>
-      </div>
-      <div class="quick-action-btn quick-action-info">
+      </button>
+      <button class="quick-action-btn" [class.active]="activeActionTab() === 'spa'" (click)="toggleActionTab('spa')">
         <span class="qa-icon">🧖</span>
         <span class="qa-label">SPA BOOKING</span>
-        <span class="qa-sub">Call Ext. 2</span>
-      </div>
-      <div class="quick-action-btn quick-action-info">
+      </button>
+      <button class="quick-action-btn" [class.active]="activeActionTab() === 'dining'" (click)="toggleActionTab('dining')">
         <span class="qa-icon">🍽</span>
         <span class="qa-label">DINING RESERVATION</span>
-        <span class="qa-sub">Call Ext. 3</span>
-      </div>
+      </button>
+      <button class="quick-action-btn" [class.active]="activeActionTab() === 'profile'" (click)="toggleActionTab('profile')">
+        <span class="qa-icon">👤</span>
+        <span class="qa-label">MY PROFILE</span>
+      </button>
     </div>
 
-    <!-- Ticket Form -->
-    @if (showTicketForm()) {
-      <div class="ticket-form-panel">
-        <h2 class="panel-title">NEW SERVICE REQUEST — ROOM {{ user?.roomNumber }}</h2>
-
-        <div class="ticket-form-grid">
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <select class="form-input" [(ngModel)]="newTicket.category" name="category">
-              @for (cat of categories; track cat) {
-                <option [value]="cat">{{ cat }}</option>
-              }
-            </select>
+    <!-- Action Panels Container -->
+    <div class="action-panels-container">
+      
+      <!-- Maintenance Form -->
+      @if (activeActionTab() === 'maintenance') {
+        <div class="interactive-panel slide-up">
+          <div class="panel-header">
+            <h2 class="panel-title">NEW SERVICE REQUEST</h2>
+            <button class="btn-close" (click)="activeActionTab.set('none')">✕</button>
           </div>
-          <div class="form-group">
-            <label class="form-label">Priority</label>
-            <select class="form-input" [(ngModel)]="newTicket.priority" name="priority">
-              @for (p of priorities; track p) {
-                <option [value]="p">{{ p }}</option>
-              }
-            </select>
+          <div class="ticket-form-grid">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-input" [(ngModel)]="newTicket.category" name="category">
+                @for (cat of categories; track cat) { <option [value]="cat">{{ cat }}</option> }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select class="form-input" [(ngModel)]="newTicket.priority" name="priority">
+                @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+              </select>
+            </div>
+            <div class="form-group form-group--full">
+              <label class="form-label">Description</label>
+              <textarea class="form-input" [(ngModel)]="newTicket.description" rows="3" placeholder="Please describe the issue or request in detail..."></textarea>
+            </div>
           </div>
-          <div class="form-group form-group--full">
-            <label class="form-label">Description</label>
-            <textarea
-              class="form-input"
-              [(ngModel)]="newTicket.description"
-              name="description"
-              rows="3"
-              placeholder="Please describe the issue or request in detail..."
-            ></textarea>
+          @if (ticketError()) { <p class="text-danger mt-8 error-msg">⚠ {{ ticketError() }}</p> }
+          <div class="flex gap-12 mt-16">
+            <button class="btn btn-primary" (click)="submitTicket()">SUBMIT REQUEST</button>
           </div>
         </div>
+      }
 
-        @if (ticketError()) {
-          <p class="text-danger mt-8" style="font-size:13px;">⚠ {{ ticketError() }}</p>
-        }
-
-        <div class="flex gap-12 mt-16">
-          <button class="btn btn-primary" id="guest-submit-request-btn" (click)="submitTicket()">
-            SUBMIT REQUEST
-          </button>
-          <button class="btn btn-ghost" (click)="showTicketForm.set(false)">CANCEL</button>
+      <!-- Room Service Menu -->
+      @if (activeActionTab() === 'room-service') {
+        <div class="interactive-panel slide-up">
+          <div class="panel-header">
+            <h2 class="panel-title">IN-ROOM DINING MENU</h2>
+            <button class="btn-close" (click)="activeActionTab.set('none')">✕</button>
+          </div>
+          <div class="menu-list">
+            @for (item of roomServiceMenu; track item.id) {
+              <div class="menu-item">
+                <div class="menu-item-info">
+                  <span class="menu-item-name">{{ item.name }}</span>
+                  <span class="menu-item-desc">{{ item.desc }}</span>
+                  <span class="menu-item-price">€{{ item.price }}</span>
+                </div>
+                <div class="menu-item-controls">
+                  <button class="qty-btn" (click)="updateRoomServiceQty(item.id, -1)">−</button>
+                  <span class="qty-val">{{ roomServiceOrder()[item.id] || 0 }}</span>
+                  <button class="qty-btn" (click)="updateRoomServiceQty(item.id, 1)">+</button>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="panel-footer">
+            <div class="order-total">
+              <span>Order Subtotal:</span>
+              <span class="total-val">€{{ roomServiceTotal() }}</span>
+            </div>
+            @if (ticketError()) { <p class="text-danger error-msg">⚠ {{ ticketError() }}</p> }
+            <button class="btn btn-primary" [disabled]="roomServiceTotal() === 0" (click)="submitRoomServiceOrder()">PLACE ORDER</button>
+          </div>
         </div>
-      </div>
-    }
+      }
+
+      <!-- Spa Booking Form -->
+      @if (activeActionTab() === 'spa') {
+        <div class="interactive-panel slide-up">
+          <div class="panel-header">
+            <h2 class="panel-title">BOOK SPA TREATMENT</h2>
+            <button class="btn-close" (click)="activeActionTab.set('none')">✕</button>
+          </div>
+          <div class="ticket-form-grid">
+            <div class="form-group form-group--full">
+              <label class="form-label">Select Treatment</label>
+              <select class="form-input" [(ngModel)]="spaForm.treatmentId">
+                <option value="" disabled selected>Choose an Alpine treatment...</option>
+                @for (t of spaTreatments; track t.id) { <option [value]="t.id">{{ t.name }} — €{{ t.price }}</option> }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-input" [(ngModel)]="spaForm.date" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time</label>
+              <input type="time" class="form-input" [(ngModel)]="spaForm.time" />
+            </div>
+          </div>
+          @if (ticketError()) { <p class="text-danger mt-8 error-msg">⚠ {{ ticketError() }}</p> }
+          <div class="flex gap-12 mt-16">
+            <button class="btn btn-primary" (click)="submitSpaBooking()">REQUEST BOOKING</button>
+          </div>
+        </div>
+      }
+
+      <!-- Dining Reservation Form -->
+      @if (activeActionTab() === 'dining') {
+        <div class="interactive-panel slide-up">
+          <div class="panel-header">
+            <h2 class="panel-title">RESTAURANT RESERVATION</h2>
+            <button class="btn-close" (click)="activeActionTab.set('none')">✕</button>
+          </div>
+          <div class="ticket-form-grid">
+            <div class="form-group">
+              <label class="form-label">Number of Guests</label>
+              <select class="form-input" [(ngModel)]="diningForm.guests">
+                @for (n of [1,2,3,4,5,6,7,8]; track n) { <option [value]="n">{{ n }} Guests</option> }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Meal Slot</label>
+              <select class="form-input" [(ngModel)]="diningForm.slot">
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-input" [(ngModel)]="diningForm.date" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time</label>
+              <input type="time" class="form-input" [(ngModel)]="diningForm.time" />
+            </div>
+          </div>
+          @if (ticketError()) { <p class="text-danger mt-8 error-msg">⚠ {{ ticketError() }}</p> }
+          <div class="flex gap-12 mt-16">
+            <button class="btn btn-primary" (click)="submitDiningBooking()">RESERVE TABLE</button>
+          </div>
+        </div>
+      }
+
+      <!-- Profile Form -->
+      @if (activeActionTab() === 'profile') {
+        <div class="interactive-panel slide-up">
+          <div class="panel-header">
+            <h2 class="panel-title">MY PROFILE</h2>
+            <button class="btn-close" (click)="activeActionTab.set('none')">✕</button>
+          </div>
+          <form (ngSubmit)="updateProfile()">
+            <div class="ticket-form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-input" [(ngModel)]="profileForm.displayName" name="displayName" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Username (Read-Only)</label>
+                <input type="text" class="form-input" [value]="user?.username" readonly disabled />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" class="form-input" [(ngModel)]="profileForm.email" name="email" required placeholder="e.g. guest@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number *</label>
+                <input type="tel" class="form-input" [(ngModel)]="profileForm.phoneNumber" name="phoneNumber" required placeholder="e.g. +43 662 123456" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Update Password (Optional)</label>
+                <input type="password" class="form-input" [(ngModel)]="profileForm.password" name="password" placeholder="Leave blank to keep current" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Room Number (Read-Only)</label>
+                <input type="text" class="form-input" [value]="'Room ' + user?.roomNumber" readonly disabled />
+              </div>
+            </div>
+            @if (ticketError()) { <p class="text-danger mt-8 error-msg">⚠ {{ ticketError() }}</p> }
+            <div class="flex gap-12 mt-16">
+              <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
 
     <!-- Success Toast -->
     @if (ticketSuccess()) {
@@ -157,3 +297,13 @@
     }
   </main>
 </div>
+
+@if (showPaymentModal()) {
+  <app-payment-modal
+    [amount]="paymentAmount()"
+    [description]="paymentDescription()"
+    [showPayLater]="false"
+    (paymentCompleted)="onPaymentCompleted($event)"
+    (cancelled)="onPaymentCancelled()">
+  </app-payment-modal>
+}

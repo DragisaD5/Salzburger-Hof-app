@@ -38,6 +38,35 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/bookings/checkout — Processes room booking checkout with simulated payment
+router.post('/checkout', async (req, res) => {
+  try {
+    const { booking, paymentMethod } = req.body;
+    if (!booking) {
+      return res.status(400).json({ message: 'Booking details are required.' });
+    }
+
+    const newBookingData = {
+      ...booking,
+      paymentMethod,
+    };
+
+    if (paymentMethod === 'Card' || paymentMethod === 'PayPal') {
+      newBookingData.paymentStatus = 'Paid';
+      newBookingData.transactionId = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+    } else {
+      newBookingData.paymentStatus = 'Unpaid';
+      newBookingData.paymentMethod = 'Pay At Check-In';
+    }
+
+    const savedBooking = new Booking(newBookingData);
+    await savedBooking.save();
+    res.status(201).json(savedBooking);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // PUT /api/bookings/:id — Admin, Receptionist
 router.put('/:id', protect, restrictTo('Admin', 'Receptionist'), async (req, res) => {
   try {

@@ -1,476 +1,367 @@
-<div class="dashboard-layout">
+<!-- ═══════════════════════════════════════════════════════════
+     ADMIN DASHBOARD — Salzburger Hof Executive Command Center
+     ═══════════════════════════════════════════════════════════ -->
 
-  <!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
+<div class="ad-layout">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
   <header class="dashboard-header">
-    <div class="dashboard-logo">
-      <span class="logo-icon">👑</span>
-      <div class="logo-text">
-        <span class="logo-name">Aurum Palace</span>
-        <span class="logo-sub">General Manager Portal</span>
-      </div>
+    <div class="header-brand">
+      <div class="header-logo">Salzburger Hof <span class="logo-star">✦</span></div>
+      <div class="header-role-badge header-role-badge--admin">Admin</div>
     </div>
-    <div class="dashboard-user">
-      <div class="user-info">
-        <span class="user-name">{{ user?.displayName || user?.username }}</span>
-        <span class="role-pill role-admin">👑 Administrator</span>
+    <div class="header-center">
+      <div class="ad-header-time">{{ today | date:'longDate' }}</div>
+    </div>
+    <div class="header-right">
+      <div class="header-avatar">{{ user?.displayName?.charAt(0)?.toUpperCase() ?? 'A' }}</div>
+      <div class="header-user-info">
+        <span class="header-user-name">{{ user?.displayName ?? 'Administrator' }}</span>
+        <span class="header-user-role">General Manager</span>
       </div>
-      <button class="btn btn-ghost btn-sm" (click)="logout()">Sign Out →</button>
+      <button class="btn btn-ghost btn-sm" id="admin-logout-btn" (click)="logout()">Sign Out</button>
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════ MAIN CONTENT ═══════════════════════════════════════ -->
-  <main class="dashboard-content admin-content">
-
-    <!-- Page Title Row -->
-    <div class="admin-page-title-row">
-      <div>
-        <h1 class="admin-page-title">Command Center</h1>
-        <p class="admin-page-subtitle">Full property overview — rooms, staff, bookings & operations</p>
-      </div>
-      <div class="admin-page-date">
-        <span class="admin-date-label">Today</span>
-        <span class="admin-date-value">{{ today | date:'EEEE, MMMM d, y' }}</span>
-      </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════ TABS ═══════════════════════════════════════ -->
-    <div class="tabs admin-tabs">
-      <button class="tab-btn" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">
-        <span class="tab-icon">📊</span> Overview
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'staff'" (click)="activeTab.set('staff')">
-        <span class="tab-icon">👥</span> Staff Management
-        <span class="tab-count">{{ staff().length }}</span>
-      </button>
-      <button class="tab-btn" [class.active]="activeTab() === 'bookings'" (click)="activeTab.set('bookings')">
-        <span class="tab-icon">📅</span> Bookings
-        <span class="tab-count">{{ bookings().length }}</span>
-      </button>
-    </div>
-
-    <!-- ═══════════════════════════════════════ LOADING ═══════════════════════════════════════ -->
+  <!-- ── MAIN ───────────────────────────────────────────────── -->
+  <main class="ad-main">
     @if (loading()) {
-      <div class="loading-center">
+      <div class="ad-loading">
         <div class="spinner"></div>
-        <span class="admin-loading-label">Loading hotel data…</span>
+        <p>Initializing Executive Dashboard…</p>
       </div>
     } @else {
 
-      <!-- ════════════════════════════════════════════════════════════════
-           TAB: OVERVIEW
-      ════════════════════════════════════════════════════════════════ -->
+      <!-- ── TABS ───────────────────────────────────────────── -->
+      <nav class="ad-tabs">
+        <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </button>
+        <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'staff'" (click)="activeTab.set('staff')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Staff Directory
+        </button>
+        <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'bookings'" (click)="activeTab.set('bookings')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Master Ledger
+        </button>
+        <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'tickets'" (click)="activeTab.set('tickets')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Service Tickets
+        </button>
+      </nav>
+
+      <!-- ══════════════ TAB: OVERVIEW ══════════════ -->
       @if (activeTab() === 'overview') {
-        <div class="overview-tab">
-
-          <!-- HERO STAT ROW -->
-          <div class="hero-stat-row">
-
-            <!-- Revenue Card -->
-            <div class="hero-stat-card hero-stat-card--revenue">
-              <div class="hero-stat-bg-icon">💰</div>
-              <div class="hero-stat-content">
-                <div class="hero-stat-label">Total Revenue</div>
-                <div class="hero-stat-value">
-                  ${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}
-                </div>
-                <div class="hero-stat-sub">Confirmed & active bookings</div>
-              </div>
-              <div class="hero-stat-icon">💰</div>
-            </div>
-
-            <!-- Total Rooms -->
-            <div class="hero-stat-card hero-stat-card--rooms">
-              <div class="hero-stat-bg-icon">🏨</div>
-              <div class="hero-stat-content">
-                <div class="hero-stat-label">Total Rooms</div>
-                <div class="hero-stat-value">{{ roomStats()?.total ?? 0 }}</div>
-                <div class="hero-stat-sub">{{ roomStats()?.free ?? 0 }} available now</div>
-              </div>
-              <div class="hero-stat-icon">🏨</div>
-            </div>
-
-            <!-- Active Guests -->
-            <div class="hero-stat-card hero-stat-card--guests">
-              <div class="hero-stat-bg-icon">🧳</div>
-              <div class="hero-stat-content">
-                <div class="hero-stat-label">Active Guests</div>
-                <div class="hero-stat-value">{{ roomStats()?.occupied ?? 0 }}</div>
-                <div class="hero-stat-sub">Currently checked in</div>
-              </div>
-              <div class="hero-stat-icon">🧳</div>
-            </div>
-
-            <!-- Open Tickets -->
-            <div class="hero-stat-card" [class.hero-stat-card--tickets-warn]="(ticketStats()?.urgent ?? 0) > 0" [class.hero-stat-card--tickets-ok]="(ticketStats()?.urgent ?? 0) === 0">
-              <div class="hero-stat-bg-icon">🔧</div>
-              <div class="hero-stat-content">
-                <div class="hero-stat-label">Open Tickets</div>
-                <div class="hero-stat-value">{{ (ticketStats()?.open ?? 0) + (ticketStats()?.inProgress ?? 0) }}</div>
-                <div class="hero-stat-sub">{{ ticketStats()?.urgent ?? 0 }} urgent</div>
-              </div>
-              <div class="hero-stat-icon">🔧</div>
-            </div>
-
-          </div>
-
-          <!-- MAINTENANCE ALERT -->
+        <div class="ad-panel fade-in">
+          
+          <!-- Urgent Alert -->
           @if ((ticketStats()?.urgent ?? 0) > 0) {
-            <div class="maintenance-alert-card">
-              <span class="maintenance-alert-icon">⚠️</span>
-              <div class="maintenance-alert-body">
-                <strong>{{ ticketStats()?.urgent }} Urgent Maintenance {{ (ticketStats()?.urgent ?? 0) === 1 ? 'Issue' : 'Issues' }}</strong>
-                <span>Immediate attention required. Please dispatch maintenance team.</span>
-              </div>
-              <div class="maintenance-alert-action">
-                <button class="btn btn-danger btn-sm" (click)="activeTab.set('overview')">View Details</button>
+            <div class="ad-alert">
+              <span class="ad-alert-icon">♨</span>
+              <div class="ad-alert-content">
+                <strong>CRITICAL MAINTENANCE ALERT</strong>
+                <span>{{ ticketStats()?.urgent }} urgent ticket(s) reported. Check Operations Command Center.</span>
               </div>
             </div>
           }
 
-          <!-- ROOM OCCUPANCY BAR -->
-          <div class="occupancy-section">
-            <div class="section-header">
-              <h2>Room Occupancy Breakdown</h2>
-              <span class="occupancy-total">{{ roomStats()?.total ?? 0 }} Total Rooms</span>
-            </div>
-
-            <div class="occupancy-card">
-              <div class="occupancy-bar-track">
-                @if ((roomStats()?.total ?? 0) > 0) {
-                  <div class="occupancy-segment occupancy-segment--occupied"
-                       [style.width.%]="((roomStats()?.occupied ?? 0) / (roomStats()?.total ?? 1)) * 100"
-                       title="Occupied">
-                  </div>
-                  <div class="occupancy-segment occupancy-segment--cleaning"
-                       [style.width.%]="((roomStats()?.cleaning ?? 0) / (roomStats()?.total ?? 1)) * 100"
-                       title="Cleaning">
-                  </div>
-                  <div class="occupancy-segment occupancy-segment--dirty"
-                       [style.width.%]="((roomStats()?.dirty ?? 0) / (roomStats()?.total ?? 1)) * 100"
-                       title="Dirty">
-                  </div>
-                  <div class="occupancy-segment occupancy-segment--free"
-                       [style.width.%]="((roomStats()?.free ?? 0) / (roomStats()?.total ?? 1)) * 100"
-                       title="Free">
-                  </div>
-                }
+          <!-- Hero Metrics -->
+          <div class="ad-metrics-row">
+            <div class="ad-metric-card ad-metric-card--revenue">
+              <div class="ad-metric-icon">✦</div>
+              <div class="ad-metric-info">
+                <span class="ad-metric-lbl">Total Revenue</span>
+                <span class="ad-metric-val">${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}</span>
               </div>
-
-              <div class="occupancy-legend">
-                <div class="occupancy-legend-item">
-                  <span class="occupancy-legend-dot occupancy-legend-dot--occupied"></span>
-                  <span class="occupancy-legend-label">Occupied</span>
-                  <span class="occupancy-legend-value">{{ roomStats()?.occupied ?? 0 }}</span>
-                  <span class="occupancy-legend-pct">
-                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.occupied ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
-                  </span>
-                </div>
-                <div class="occupancy-legend-item">
-                  <span class="occupancy-legend-dot occupancy-legend-dot--free"></span>
-                  <span class="occupancy-legend-label">Available</span>
-                  <span class="occupancy-legend-value">{{ roomStats()?.free ?? 0 }}</span>
-                  <span class="occupancy-legend-pct">
-                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.free ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
-                  </span>
-                </div>
-                <div class="occupancy-legend-item">
-                  <span class="occupancy-legend-dot occupancy-legend-dot--cleaning"></span>
-                  <span class="occupancy-legend-label">Cleaning</span>
-                  <span class="occupancy-legend-value">{{ roomStats()?.cleaning ?? 0 }}</span>
-                  <span class="occupancy-legend-pct">
-                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.cleaning ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
-                  </span>
-                </div>
-                <div class="occupancy-legend-item">
-                  <span class="occupancy-legend-dot occupancy-legend-dot--dirty"></span>
-                  <span class="occupancy-legend-label">Dirty</span>
-                  <span class="occupancy-legend-value">{{ roomStats()?.dirty ?? 0 }}</span>
-                  <span class="occupancy-legend-pct">
-                    ({{ (roomStats()?.total ?? 0) > 0 ? (((roomStats()?.dirty ?? 0) / (roomStats()?.total ?? 1)) * 100 | number:'1.0-0') : 0 }}%)
-                  </span>
-                </div>
-                @if ((roomStats()?.vip ?? 0) > 0) {
-                  <div class="occupancy-legend-item">
-                    <span class="occupancy-legend-dot occupancy-legend-dot--vip"></span>
-                    <span class="occupancy-legend-label">VIP</span>
-                    <span class="occupancy-legend-value">{{ roomStats()?.vip ?? 0 }}</span>
-                  </div>
-                }
+            </div>
+            <div class="ad-metric-card">
+              <div class="ad-metric-icon">◆</div>
+              <div class="ad-metric-info">
+                <span class="ad-metric-lbl">Total Rooms</span>
+                <span class="ad-metric-val">{{ roomStats()?.total ?? 0 }}</span>
+              </div>
+            </div>
+            <div class="ad-metric-card">
+              <div class="ad-metric-icon">⚜</div>
+              <div class="ad-metric-info">
+                <span class="ad-metric-lbl">Active Bookings</span>
+                <span class="ad-metric-val">{{ bookings().length }}</span>
+              </div>
+            </div>
+            <div class="ad-metric-card" [class.ad-metric-card--warning]="(ticketStats()?.open ?? 0) > 0">
+              <div class="ad-metric-icon">⚙</div>
+              <div class="ad-metric-info">
+                <span class="ad-metric-lbl">Open Tickets</span>
+                <span class="ad-metric-val">{{ ticketStats()?.open ?? 0 }}</span>
               </div>
             </div>
           </div>
 
-          <!-- TWO COLUMN LOWER SECTION -->
-          <div class="overview-two-col">
-
-            <!-- Left: Recent Bookings -->
-            <div class="overview-panel">
-              <div class="section-header">
-                <h2>Recent Bookings</h2>
-                <button class="btn btn-ghost btn-sm" (click)="activeTab.set('bookings')">View All →</button>
+          <!-- Occupancy Overview -->
+          @if (roomStats() && roomStats()!.total > 0) {
+            <div class="ad-section-card">
+              <h3 class="ad-section-title">Property Occupancy</h3>
+              <div class="ad-occ-bar">
+                <div class="ad-occ-seg ad-occ-seg--occ" [style.flex]="roomStats()!.occupied">
+                  @if(roomStats()!.occupied > 0) { <span>{{ roomStats()!.occupied }}</span> }
+                </div>
+                <div class="ad-occ-seg ad-occ-seg--cln" [style.flex]="roomStats()!.cleaning">
+                  @if(roomStats()!.cleaning > 0) { <span>{{ roomStats()!.cleaning }}</span> }
+                </div>
+                <div class="ad-occ-seg ad-occ-seg--drt" [style.flex]="roomStats()!.dirty">
+                  @if(roomStats()!.dirty > 0) { <span>{{ roomStats()!.dirty }}</span> }
+                </div>
+                <div class="ad-occ-seg ad-occ-seg--fre" [style.flex]="roomStats()!.free">
+                  @if(roomStats()!.free > 0) { <span>{{ roomStats()!.free }}</span> }
+                </div>
               </div>
-              <div class="mini-bookings-table">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Guest</th>
-                      <th>Room</th>
-                      <th>Check-In</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
+              <div class="ad-occ-legend">
+                <span><span class="ad-dot ad-dot--occ"></span>Occupied ({{ (roomStats()!.occupied / roomStats()!.total * 100) | number:'1.0-0' }}%)</span>
+                <span><span class="ad-dot ad-dot--cln"></span>Cleaning ({{ (roomStats()!.cleaning / roomStats()!.total * 100) | number:'1.0-0' }}%)</span>
+                <span><span class="ad-dot ad-dot--drt"></span>Attention ({{ (roomStats()!.dirty / roomStats()!.total * 100) | number:'1.0-0' }}%)</span>
+                <span><span class="ad-dot ad-dot--fre"></span>Free ({{ (roomStats()!.free / roomStats()!.total * 100) | number:'1.0-0' }}%)</span>
+              </div>
+            </div>
+          }
+
+          <!-- Live System Audit Feed -->
+          <div class="ad-section-card">
+            <h3 class="ad-section-title ad-section-title--live">
+              <span class="ad-live-dot"></span> Live Audit Feed
+            </h3>
+            @if (activityLogs().length === 0) {
+              <div class="ad-empty-sm">No activity logs recorded.</div>
+            } @else {
+              <div class="ad-audit-feed">
+                @for (log of activityLogs().slice(0, 10); track log._id) {
+                  <div class="ad-audit-item">
+                    <div class="ad-audit-badge">ACTIVATION</div>
+                    <div class="ad-audit-content">
+                      <span class="ad-audit-details">{{ log.details }}</span>
+                      <span class="ad-audit-time">✦ Verified at {{ log.timestamp | date:'MMM d, HH:mm:ss' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Two columns: Recent Bookings & Staff on Duty -->
+          <div class="ad-split">
+            <!-- Left -->
+            <div class="ad-section-card">
+              <h3 class="ad-section-title">Recent Reservations</h3>
+              @if (bookings().length === 0) {
+                <div class="ad-empty-sm">No reservations yet.</div>
+              } @else {
+                <table class="ad-mini-table">
                   <tbody>
-                    @for (booking of bookings().slice(0, 5); track booking._id) {
+                    @for (b of bookings().slice(0, 5); track b._id) {
                       <tr>
                         <td>
-                          <div class="mini-guest-name">{{ booking.guestName }}</div>
-                          <div class="mini-guest-type">{{ booking.roomType }}</div>
+                          <div class="ad-mini-guest">{{ b.guestName }}</div>
+                          <div class="ad-mini-sub">{{ b.roomType }} · RM {{ b.roomNumber ?? '—' }}</div>
                         </td>
-                        <td>
-                          <span class="mini-room-num">{{ booking.roomNumber }}</span>
+                        <td class="ad-right-align">
+                          <div class="ad-mini-price">${{ b.totalPrice | number:'1.0-0' }}</div>
+                          <div class="ad-badge" [class]="getBookingBadge(b.status)">{{ b.status }}</div>
                         </td>
-                        <td>
-                          <span class="mini-date">{{ booking.checkIn | date:'MMM d' }}</span>
-                        </td>
-                        <td>
-                          <span class="badge" [ngClass]="getBookingBadge(booking.status)">{{ booking.status }}</span>
-                        </td>
-                      </tr>
-                    }
-                    @if (bookings().length === 0) {
-                      <tr>
-                        <td colspan="4" class="empty-table-cell">No bookings found</td>
                       </tr>
                     }
                   </tbody>
                 </table>
-              </div>
+              }
             </div>
 
-            <!-- Right: Staff on Duty -->
-            <div class="overview-panel">
-              <div class="section-header">
-                <h2>Staff on Duty</h2>
-                <button class="btn btn-ghost btn-sm" (click)="activeTab.set('staff')">Manage →</button>
-              </div>
-              <div class="staff-duty-list">
-                @for (member of staff(); track member._id) {
-                  <div class="staff-duty-item">
-                    <div class="staff-duty-avatar" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
-                      {{ member.displayName?.charAt(0)?.toUpperCase() || member.username?.charAt(0)?.toUpperCase() }}
+            <!-- Right -->
+            <div class="ad-section-card">
+              <h3 class="ad-section-title">Staff On Duty</h3>
+              @if (staff().length === 0) {
+                <div class="ad-empty-sm">No staff registered.</div>
+              } @else {
+                <div class="ad-staff-list">
+                  @for (member of staff(); track member._id) {
+                    <div class="ad-staff-item">
+                      <div class="ad-staff-avatar" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
+                        {{ (member.displayName || member.username || '?').charAt(0).toUpperCase() }}
+                      </div>
+                      <div class="ad-staff-details">
+                        <span class="ad-staff-name">{{ member.displayName || member.username }}</span>
+                        <span class="ad-staff-role">{{ getRoleIcon(member.role) }} {{ member.role }}</span>
+                      </div>
+                      <div class="ad-staff-meta">
+                        @if (member.lastLogin) { <span class="ad-last-seen">Seen {{ member.lastLogin | date:'HH:mm' }}</span> }
+                        @else { <span class="ad-last-seen">Never logged in</span> }
+                      </div>
                     </div>
-                    <div class="staff-duty-info">
-                      <span class="staff-duty-name">{{ member.displayName || member.username }}</span>
-                      <span class="staff-duty-role">{{ getRoleIcon(member.role) }} {{ member.role }}</span>
-                    </div>
-                    <div class="staff-duty-login">
-                      @if (member.lastLogin) {
-                        <span class="staff-duty-login-label">{{ member.lastLogin | date:'HH:mm' }}</span>
-                      } @else {
-                        <span class="staff-duty-login-never">Never</span>
-                      }
-                    </div>
-                  </div>
-                }
-                @if (staff().length === 0) {
-                  <div class="empty-duty-list">No staff members found</div>
-                }
-              </div>
+                  }
+                </div>
+              }
             </div>
-
           </div>
         </div>
       }
 
-      <!-- ════════════════════════════════════════════════════════════════
-           TAB: STAFF
-      ════════════════════════════════════════════════════════════════ -->
+      <!-- ══════════════ TAB: STAFF DIRECTORY ══════════════ -->
       @if (activeTab() === 'staff') {
-        <div class="staff-tab">
-
-          <!-- Staff Tab Header -->
-          <div class="staff-tab-header">
+        <div class="ad-panel fade-in">
+          <div class="ad-toolbar">
             <div>
-              <h2 class="staff-tab-title">Staff Management</h2>
-              <p class="staff-tab-sub">{{ staff().length }} team members across all roles</p>
+              <h2 class="ad-page-title">Staff Directory</h2>
+              <p class="ad-page-sub">Manage system access and personnel roles</p>
             </div>
-            <button class="btn btn-amber" (click)="showCreateStaff.set(!showCreateStaff())">
-              {{ showCreateStaff() ? '✕ Cancel' : '+ Add Staff Member' }}
+            <button class="btn btn-primary" (click)="showCreateStaff.set(!showCreateStaff())">
+              {{ showCreateStaff() ? '✕ Close Form' : '+ Add Personnel' }}
             </button>
           </div>
 
-          <!-- Create Staff Form (Collapsible) -->
           @if (showCreateStaff()) {
-            <div class="create-staff-form-card">
-              <div class="create-staff-form-header">
-                <span class="create-staff-form-icon">👤</span>
-                <h3 class="create-staff-form-title">New Staff Member</h3>
-              </div>
-              <div class="create-staff-form-grid">
+            <div class="ad-create-card slide-down">
+              <h3 class="ad-create-title">Register New Personnel</h3>
+              <form class="ad-form-grid" (ngSubmit)="createStaff()">
                 <div class="form-group">
                   <label class="form-label">Display Name</label>
-                  <input class="form-input" type="text" [(ngModel)]="newStaff.displayName" placeholder="e.g. Maria Santos" />
+                  <input class="form-input" type="text" [(ngModel)]="newStaff.displayName" name="displayName" placeholder="e.g. Maria Rossi" required />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Username</label>
-                  <input class="form-input" type="text" [(ngModel)]="newStaff.username" placeholder="e.g. maria.santos" />
+                  <label class="form-label">System Username</label>
+                  <input class="form-input" type="text" [(ngModel)]="newStaff.username" name="username" placeholder="m.rossi" required />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Password</label>
-                  <input class="form-input" type="password" [(ngModel)]="newStaff.password" placeholder="Minimum 8 characters" />
+                  <label class="form-label">Temporary Password</label>
+                  <input class="form-input" type="password" [(ngModel)]="newStaff.password" name="password" required />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Role</label>
-                  <select class="form-input" [(ngModel)]="newStaff.role">
-                    <option value="">Select a role…</option>
-                    @for (role of roles; track role) {
-                      <option [value]="role">{{ role }}</option>
-                    }
+                  <label class="form-label">Assigned Role</label>
+                  <select class="form-input" [(ngModel)]="newStaff.role" name="role">
+                    @for (r of roles; track r) { <option [value]="r">{{ r }}</option> }
                   </select>
                 </div>
                 @if (newStaff.role === 'Guest') {
                   <div class="form-group">
                     <label class="form-label">Room Number</label>
-                    <input class="form-input" type="text" [(ngModel)]="newStaff.roomNumber" placeholder="e.g. 214" />
+                    <input class="form-input" type="number" [(ngModel)]="newStaff.roomNumber" name="roomNumber" placeholder="e.g. 101" />
                   </div>
                 }
-              </div>
-              <div class="create-staff-form-actions">
-                <button class="btn btn-outline" (click)="showCreateStaff.set(false)">Cancel</button>
-                <button class="btn btn-primary" (click)="createStaff()">✓ Create Staff Member</button>
-              </div>
-            </div>
-          }
-
-          <!-- Staff grouped by Role -->
-          @for (role of roleKeys(); track role) {
-            <div class="staff-role-section">
-              <div class="staff-role-header">
-                <div class="staff-role-title-row">
-                  <span class="staff-role-icon-lg">{{ getRoleIcon(role) }}</span>
-                  <h3 class="staff-role-name">{{ role }}</h3>
-                  <span class="staff-role-count">{{ staffByRole()[role]?.length ?? 0 }} members</span>
+                <div class="ad-form-actions">
+                  <button type="button" class="btn btn-ghost" (click)="showCreateStaff.set(false)">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Create User</button>
                 </div>
-              </div>
-
-              <div class="staff-cards-grid">
-                @for (member of staffByRole()[role]; track member._id) {
-                  <div class="staff-member-card">
-                    <!-- Avatar -->
-                    <div class="staff-avatar-lg" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
-                      {{ member.displayName?.charAt(0)?.toUpperCase() || member.username?.charAt(0)?.toUpperCase() }}
-                    </div>
-
-                    <!-- Info -->
-                    <div class="staff-member-info">
-                      <span class="staff-member-name">{{ member.displayName || member.username }}</span>
-                      <span class="staff-member-username">{{ '@' + member.username }}</span>
-                      @if (member.roomNumber) {
-                        <span class="staff-member-room">🏨 Room {{ member.roomNumber }}</span>
-                      }
-                    </div>
-
-                    <!-- Role badge -->
-                    <div class="staff-member-meta">
-                      <span class="staff-role-badge" [attr.data-role]="member.role">
-                        {{ getRoleIcon(member.role) }} {{ member.role }}
-                      </span>
-                      <div class="staff-last-login">
-                        <span class="staff-last-login-label">Last login</span>
-                        @if (member.lastLogin) {
-                          <span class="staff-last-login-time">{{ member.lastLogin | date:'MMM d, HH:mm' }}</span>
-                        } @else {
-                          <span class="staff-last-login-never">Never logged in</span>
-                        }
-                      </div>
-                    </div>
-
-                    <!-- Delete -->
-                    <button class="btn btn-danger btn-sm staff-delete-btn" (click)="deleteStaff(member)">
-                      🗑 Remove
-                    </button>
-                  </div>
-                }
-              </div>
+              </form>
             </div>
           }
 
           @if (staff().length === 0) {
-            <div class="empty-state-admin">
-              <div class="empty-state-icon">👥</div>
-              <h3>No Staff Members</h3>
-              <p>Add your first staff member using the button above.</p>
+            <div class="ad-empty">
+              <div class="ad-empty-icon">⬡</div>
+              <h3>No Personnel Registered</h3>
+              <p>Add staff members to grant them system access.</p>
+            </div>
+          } @else {
+            <div class="ad-role-groups">
+              @for (role of roleKeys(); track role) {
+                <div class="ad-role-group">
+                  <div class="ad-role-header">
+                    <span class="ad-role-icon">{{ getRoleIcon(role) }}</span>
+                    <h3>{{ role }}</h3>
+                    <span class="ad-role-count">{{ staffByRole()[role].length }} members</span>
+                  </div>
+                  <div class="ad-staff-grid">
+                    @for (member of staffByRole()[role]; track member._id) {
+                      <div class="ad-staff-card">
+                        <div class="ad-sc-top">
+                          <div class="ad-sc-avatar" [style.background]="'linear-gradient(135deg, ' + getRoleColor(member.role) + ')'">
+                            {{ (member.displayName || member.username || '?').charAt(0).toUpperCase() }}
+                          </div>
+                          <button class="ad-delete-btn" (click)="deleteStaff(member)" title="Revoke Access">✕</button>
+                        </div>
+                        <div class="ad-sc-body">
+                          <div class="ad-sc-name">{{ member.displayName || member.username }}</div>
+                          <div class="ad-sc-user">
+                            {{ '@' + member.username }}
+                            @if (member.role === 'Guest') {
+                              <span class="status-chip status-chip--{{ member.accountStatus?.toLowerCase() }}">
+                                {{ member.accountStatus || 'Active' }}
+                              </span>
+                            }
+                          </div>
+                          @if (member.roomNumber) { <div class="ad-sc-room">RM {{ member.roomNumber }}</div> }
+                        </div>
+                        <div class="ad-sc-footer">
+                          @if (member.lastLogin) { <span>Login: {{ member.lastLogin | date:'MMM d, HH:mm' }}</span> }
+                          @else { <span>No login history</span> }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           }
-
         </div>
       }
 
-      <!-- ════════════════════════════════════════════════════════════════
-           TAB: BOOKINGS
-      ════════════════════════════════════════════════════════════════ -->
+      <!-- ══════════════ TAB: BOOKINGS ══════════════ -->
       @if (activeTab() === 'bookings') {
-        <div class="bookings-tab">
-
-          <div class="bookings-tab-header">
+        <div class="ad-panel fade-in">
+          <div class="ad-toolbar">
             <div>
-              <h2 class="bookings-tab-title">All Bookings</h2>
-              <p class="bookings-tab-sub">Complete reservation record — {{ bookings().length }} total bookings</p>
+              <h2 class="ad-page-title">Master Ledger</h2>
+              <p class="ad-page-sub">Complete historical and active reservation records</p>
             </div>
-            <div class="bookings-revenue-total">
-              <span class="bookings-revenue-label">Total Revenue</span>
-              <span class="bookings-revenue-value">${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}</span>
+            <div class="ad-ledger-rev">
+              <span>Gross Revenue</span>
+              <strong>${{ bookings().reduce(getRevenue, 0) | number:'1.0-0' }}</strong>
             </div>
           </div>
 
           @if (bookings().length === 0) {
-            <div class="empty-state-admin">
-              <div class="empty-state-icon">📅</div>
-              <h3>No Bookings Yet</h3>
-              <p>Reservations will appear here once guests book rooms.</p>
+            <div class="ad-empty">
+              <div class="ad-empty-icon">◆</div>
+              <h3>Ledger is Empty</h3>
+              <p>No reservations recorded in the system.</p>
             </div>
           } @else {
-            <div class="bookings-table-wrapper">
-              <table class="data-table bookings-table">
+            <div class="ad-table-wrap">
+              <table class="ad-table">
                 <thead>
                   <tr>
-                    <th>Guest</th>
-                    <th>Room</th>
-                    <th>Type</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
+                    <th>Guest Details</th>
+                    <th>Accommodations</th>
+                    <th>Dates</th>
                     <th>Source</th>
-                    <th>Revenue</th>
+                    <th>Financials</th>
                     <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (booking of bookings(); track booking._id) {
-                    <tr class="booking-row">
+                  @for (b of bookings(); track b._id) {
+                    <tr>
                       <td>
-                        <div class="booking-guest-name">{{ booking.guestName }}</div>
-                        <div class="booking-guest-email">{{ booking.guestEmail }}</div>
+                        <div class="ad-td-flex">
+                          <div class="ad-td-avatar">{{ b.guestName.charAt(0).toUpperCase() }}</div>
+                          <div>
+                            <div class="ad-td-name">{{ b.guestName }}</div>
+                            <div class="ad-td-sub">{{ b.guestEmail }}</div>
+                          </div>
+                        </div>
                       </td>
                       <td>
-                        <span class="booking-room-num">{{ booking.roomNumber }}</span>
+                        <div class="ad-td-bold">{{ b.roomType }}</div>
+                        <div class="ad-td-sub">Room {{ b.roomNumber ?? 'Unassigned' }}</div>
                       </td>
                       <td>
-                        <span class="booking-room-type">{{ booking.roomType }}</span>
+                        <div class="ad-td-bold">{{ b.checkIn | date:'MMM d' }} → {{ b.checkOut | date:'MMM d' }}</div>
+                        <div class="ad-td-sub">{{ b.checkIn | date:'yyyy' }}</div>
                       </td>
+                      <td><span class="ad-td-tag">{{ b.source }}</span></td>
+                      <td><span class="ad-td-price">${{ b.totalPrice | number:'1.0-0' }}</span></td>
+                      <td><span class="ad-badge" [class]="getBookingBadge(b.status)">{{ b.status }}</span></td>
                       <td>
-                        <span class="booking-date">{{ booking.checkIn | date:'MMM d, y' }}</span>
-                      </td>
-                      <td>
-                        <span class="booking-date">{{ booking.checkOut | date:'MMM d, y' }}</span>
-                      </td>
-                      <td>
-                        <span class="booking-source">{{ booking.source }}</span>
-                      </td>
-                      <td>
-                        <span class="booking-price">${{ booking.totalPrice | number:'1.0-0' }}</span>
-                      </td>
-                      <td>
-                        <span class="badge" [ngClass]="getBookingBadge(booking.status)">{{ booking.status }}</span>
+                        <button class="ad-delete-btn" (click)="deleteBooking(b)" title="Delete Reservation" style="position: static; transform: none; width: auto; height: auto; padding: 4px 8px; border-radius: 4px; font-size: 12px; background: rgba(176, 58, 46, 0.15); color: #e74c3c; border: 1px solid rgba(176, 58, 46, 0.3);">Delete</button>
                       </td>
                     </tr>
                   }
@@ -478,18 +369,81 @@
               </table>
             </div>
           }
+        </div>
+      }
 
+      <!-- ══════════════ TAB: TICKETS ══════════════ -->
+      @if (activeTab() === 'tickets') {
+        <div class="ad-panel fade-in">
+          <div class="ad-toolbar">
+            <div>
+              <h2 class="ad-page-title">Service Tickets</h2>
+              <p class="ad-page-sub">Manage maintenance and guest request tickets</p>
+            </div>
+            <div class="ad-ledger-rev">
+              <span>Total Tickets</span>
+              <strong>{{ tickets().length }}</strong>
+            </div>
+          </div>
+
+          @if (tickets().length === 0) {
+            <div class="ad-empty">
+              <div class="ad-empty-icon">⚙</div>
+              <h3>No Tickets Recorded</h3>
+              <p>All clear across the property.</p>
+            </div>
+          } @else {
+            <div class="ad-table-wrap">
+              <table class="ad-table">
+                <thead>
+                  <tr>
+                    <th>Room</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of tickets(); track t._id) {
+                    <tr>
+                      <td><strong>Room {{ t.roomNumber }}</strong></td>
+                      <td><span class="ad-td-tag">{{ t.category }}</span></td>
+                      <td>
+                        <span class="badge" [class]="t.priority === 'URGENT' ? 'badge-dirty' : t.priority === 'High' ? 'badge-low' : 'badge-free'">
+                          {{ t.priority }}
+                        </span>
+                      </td>
+                      <td><div class="ad-td-sub" style="max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ t.description }}</div></td>
+                      <td>{{ t.createdAt | date:'short' }}</td>
+                      <td>
+                        <span class="badge" [class]="t.status === 'Resolved' ? 'badge-free' : t.status === 'In Progress' ? 'badge-active' : 'badge-pending'">
+                          {{ t.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <button class="ad-delete-btn" (click)="deleteTicket(t)" title="Delete Ticket" style="position: static; transform: none; width: auto; height: auto; padding: 4px 8px; border-radius: 4px; font-size: 12px; background: rgba(176, 58, 46, 0.15); color: #e74c3c; border: 1px solid rgba(176, 58, 46, 0.3);">Delete</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
       }
 
     }
   </main>
 
-  <!-- ═══════════════════════════════════════ TOAST ═══════════════════════════════════════ -->
+  <!-- ── TOAST ──────────────────────────────────────────────── -->
   @if (toast()) {
-    <div class="toast" [class.success]="toastType() === 'success'" [class.error]="toastType() === 'error'">
-      <span class="toast-icon">{{ toastType() === 'success' ? '✅' : '❌' }}</span>
-      {{ toast() }}
+    <div class="ad-toast" [class.ad-toast--success]="toastType() === 'success'" [class.ad-toast--error]="toastType() === 'error'">
+      @if (toastType() === 'success') { <span class="ad-toast-icon">✦</span> }
+      @else { <span class="ad-toast-icon">✕</span> }
+      <span class="ad-toast-text">{{ toast() }}</span>
     </div>
   }
 

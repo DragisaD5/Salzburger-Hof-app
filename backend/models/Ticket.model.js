@@ -11,6 +11,12 @@ const ticketSchema = new mongoose.Schema(
       enum: ['Plumbing', 'Electrical', 'Spa', 'General', 'Minibar', 'Heating'],
       required: true,
     },
+    type: {
+      type: String,
+      enum: ['Maintenance', 'RoomService'],
+      required: true,
+      default: 'Maintenance',
+    },
     priority: {
       type: String,
       enum: ['Low', 'High', 'URGENT'],
@@ -42,6 +48,23 @@ const ticketSchema = new mongoose.Schema(
     notes: {
       type: String,
       default: '',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['Unpaid', 'Paid', 'Pending'],
+      default: 'Unpaid',
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['Card', 'PayPal', 'Room Charge'],
+      default: 'Room Charge',
+    },
+    transactionId: {
+      type: String,
+    },
+    price: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

@@ -76,18 +76,46 @@ export class HousekeepingDashboardComponent implements OnInit {
   }
 
   startCleaning(room: Room): void {
-    // Set room to Cleaning status
-    this.roomService.updateStatus(room._id, 'Cleaning').subscribe({
-      next: (updated) => {
-        this.rooms.update((prev) => prev.map((r) => r._id === updated._id ? updated : r));
-        this.activeSession.set({
-          room: updated,
-          checklist: this.CHECKLIST_TEMPLATE.map((i) => ({ ...i })),
-          notes: '',
-        });
-      },
-      error: () => this.showToast('Failed to start cleaning session.', 'error'),
-    });
+    const saved = localStorage.getItem(`hk_session_${room._id}`);
+    let savedSession: { checklist: ChecklistItem[]; notes: string } | null = null;
+    if (saved) {
+      try {
+        savedSession = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved housekeeping session', e);
+      }
+    }
+
+    if (room.status === 'Cleaning') {
+      // Room is already in Cleaning status, just open the session
+      this.activeSession.set({
+        room,
+        checklist: savedSession?.checklist ?? this.CHECKLIST_TEMPLATE.map((i) => ({ ...i })),
+        notes: savedSession?.notes ?? '',
+      });
+    } else {
+      // Set room to Cleaning status
+      this.roomService.updateStatus(room._id, 'Cleaning').subscribe({
+        next: (updated) => {
+          this.rooms.update((prev) => prev.map((r) => r._id === updated._id ? updated : r));
+          this.activeSession.set({
+            room: updated,
+            checklist: savedSession?.checklist ?? this.CHECKLIST_TEMPLATE.map((i) => ({ ...i })),
+            notes: savedSession?.notes ?? '',
+          });
+        },
+        error: () => this.showToast('Failed to start cleaning session.', 'error'),
+      });
+    }
+  }
+
+  saveSessionProgress(): void {
+    const session = this.activeSession();
+    if (!session) return;
+    localStorage.setItem(`hk_session_${session.room._id}`, JSON.stringify({
+      checklist: session.checklist,
+      notes: session.notes,
+    }));
   }
 
   toggleChecklistItem(index: number): void {
@@ -97,6 +125,7 @@ export class HousekeepingDashboardComponent implements OnInit {
       i === index ? { ...item, checked: !item.checked } : item
     );
     this.activeSession.set({ ...session, checklist: updatedChecklist });
+    this.saveSessionProgress();
   }
 
   get allChecked(): boolean {
@@ -114,6 +143,7 @@ export class HousekeepingDashboardComponent implements OnInit {
     this.roomService.updateStatus(session.room._id, 'Free', session.notes || 'Cleaned and ready').subscribe({
       next: (updated) => {
         this.rooms.update((prev) => prev.map((r) => r._id === updated._id ? updated : r));
+        localStorage.removeItem(`hk_session_${session.room._id}`);
         this.activeSession.set(null);
         this.showToast(`Room ${updated.roomNumber} marked as FREE. Excellent work!`, 'success');
       },
@@ -122,6 +152,7 @@ export class HousekeepingDashboardComponent implements OnInit {
   }
 
   cancelSession(): void {
+    this.saveSessionProgress();
     this.activeSession.set(null);
   }
 

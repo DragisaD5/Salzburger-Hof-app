@@ -24,6 +24,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    phone: {
+      type: String,
+      required: function() { return this.role === 'Guest'; },
+      trim: true,
+    },
+    accountStatus: {
+      type: String,
+      enum: ['Pending', 'Active', 'Rejected'],
+      default: 'Active',
+    },
     roomNumber: {
       type: Number,
       default: null, // Only populated for Guests
