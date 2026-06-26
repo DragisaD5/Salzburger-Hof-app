@@ -45,8 +45,8 @@ export class BookingService {
     return this.http.post<Booking>(this.base, data);
   }
 
-  checkoutBooking(bookingData: Partial<Booking>, paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In'): Observable<Booking> {
-    return this.http.post<Booking>(`${this.base}/checkout`, { booking: bookingData, paymentMethod });
+  checkoutBooking(bookingData: Partial<Booking>, paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In', transactionId?: string): Observable<Booking> {
+    return this.http.post<Booking>(`${this.base}/checkout`, { booking: bookingData, paymentMethod, transactionId });
   }
 
   updateBooking(id: string, data: Partial<Booking>): Observable<Booking> {

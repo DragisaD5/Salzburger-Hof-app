@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BookingService } from '../../core/services/booking.service';
 import { WeatherService } from '../../core/services/weather.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PaymentModalComponent } from '../../components/payment-modal/payment-modal.component';
 
 @Component({
@@ -96,7 +97,8 @@ export class PublicComponent implements OnInit, AfterViewInit {
   constructor(
     private router: Router,
     private bookingService: BookingService,
-    private weatherService: WeatherService
+    private weatherService: WeatherService,
+    private authService: AuthService
   ) {}
 
   @HostListener('window:scroll')
@@ -176,6 +178,13 @@ export class PublicComponent implements OnInit, AfterViewInit {
   }
 
   submitBooking(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.bookingError.set('You must log in to complete your reservation');
+      alert('You must log in to complete your reservation');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     if (!this.bookingForm.guestName || !this.bookingForm.guestEmail) {
       this.bookingError.set('Please fill in your name and email.');
       return;
@@ -201,6 +210,17 @@ export class PublicComponent implements OnInit, AfterViewInit {
     this.showPaymentModal.set(true);
   }
 
+  bookPackage(addon: 'spa' | 'ski' | 'dining'): void {
+    if (!this.authService.isLoggedIn()) {
+      this.bookingError.set('You must log in to complete your reservation');
+      alert('You must log in to complete your reservation');
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.selectedAddons[addon] = true;
+    this.scrollToBooking();
+  }
+
   onPaymentCompleted(result: { paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In'; transactionId?: string }): void {
     this.showPaymentModal.set(false);
     this.bookingLoading.set(true);
@@ -208,7 +228,7 @@ export class PublicComponent implements OnInit, AfterViewInit {
     const bookingData = this.pendingBookingData();
     if (!bookingData) return;
 
-    this.bookingService.checkoutBooking(bookingData, result.paymentMethod).subscribe({
+    this.bookingService.checkoutBooking(bookingData, result.paymentMethod, result.transactionId).subscribe({
       next: () => {
         this.bookingLoading.set(false);
         this.bookingSuccess.set(true);

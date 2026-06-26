@@ -25,89 +25,44 @@
 
     <!-- Main Payment Forms -->
     @if (!isSuccess()) {
-      <div class="payment-tabs">
-        <button class="tab-link" [class.active]="activeTab() === 'card'" (click)="selectTab('card')">
-          <span class="icon">💳</span> CREDIT CARD
-        </button>
-        <button class="tab-link" [class.active]="activeTab() === 'paypal'" (click)="selectTab('paypal')">
-          <span class="icon">🅿️</span> PAYPAL
-        </button>
-      </div>
-
-      <div class="tab-content-container">
-        
-        <!-- CARD TAB -->
-        @if (activeTab() === 'card') {
-          <div class="tab-pane">
-            <div class="card-form">
-              <div class="form-row">
-                <label class="payment-label">Cardholder Name</label>
-                <input type="text" class="payment-input" placeholder="e.g. Sebastian Müller" [(ngModel)]="cardholderName" />
-              </div>
-              <div class="form-row">
-                <label class="payment-label">Card Number</label>
-                <input type="text" class="payment-input card-num-field" placeholder="0000 0000 0000 0000" [value]="cardNumber" (input)="onCardNumberInput($event)" />
-              </div>
-              <div class="form-col-2">
-                <div class="form-row">
-                  <label class="payment-label">Expiry Date</label>
-                  <input type="text" class="payment-input" placeholder="MM/YY" [value]="expiry" (input)="onExpiryInput($event)" />
-                </div>
-                <div class="form-row">
-                  <label class="payment-label">CVV</label>
-                  <input type="password" class="payment-input" placeholder="000" [value]="cvv" (input)="onCvvInput($event)" />
-                </div>
-              </div>
-
-              <!-- Errors -->
-              @if (cardErrors().length > 0) {
-                <div class="error-panel">
-                  @for (err of cardErrors(); track err) {
-                    <p class="err-msg">⚠ {{ err }}</p>
-                  }
-                </div>
-              }
-
-              <!-- Submit Button -->
-              <button class="pay-btn card-pay-btn" [disabled]="isProcessing()" (click)="payWithCard()">
-                @if (isProcessing()) {
-                  <span class="spinner-mini"></span> SECURING CONNECTION...
-                } @else {
-                  AUTHORIZE PAYMENT & SECURE ROOM
-                }
+      <div class="paypal-content">
+        <div class="paypal-intro">
+          <p class="paypal-info">Pay securely using your PayPal account or card via PayPal Checkout.</p>
+          
+          <div style="margin-bottom: 20px;">
+            <button class="pay-later-btn" type="button" style="background: linear-gradient(135deg, #1b1b1b 0%, #333333 100%); border: 1px solid rgba(212, 168, 87, 0.4); color: #d4a857; padding: 12px; font-size: 13px; width: 100%; border-radius: 4px; font-weight: 600;" (click)="simulateSuccessPayment()">
+              ⚡ SIMULATE CHECKOUT SUCCESS (DEV BYPASS)
+            </button>
+            <div style="text-align: center; margin: 10px 0; color: var(--text-muted); font-size: 11px;">— OR USE PAYPAL CHECKOUT BELOW —</div>
+          </div>
+          
+          @if (paypalInitError()) {
+            <div class="error-panel" style="padding: 16px; background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); border-radius: 4px; text-align: center;">
+              <p class="err-msg" style="color: var(--danger); font-size: 13px; margin-bottom: 12px;">⚠ Failed to load PayPal Checkout. Please check your connection and try again.</p>
+              <button class="pay-later-btn" style="background: linear-gradient(135deg, #7c5a1a 0%, #b8762a 100%); border: 1px solid #7c5a1a; padding: 10px 16px; font-size: 13px; width: 100%; border-radius: 4px;" (click)="simulateSuccessPayment()">
+                Simulate Successful Payment (Bypass for Testing)
               </button>
             </div>
-          </div>
-        }
-
-        <!-- PAYPAY TAB -->
-        @if (activeTab() === 'paypal') {
-          <div class="tab-pane center-pane">
-            <div class="paypal-intro">
-              <p class="paypal-info">Pay securely using your PayPal account. Click the smart button below to initialize authorization.</p>
-              
-              <button class="paypal-smart-btn" (click)="openPayPalSimulator()">
-                <span class="paypal-wordmark">
-                  <span class="pay">Pay</span><span class="pal">Pal</span>
-                </span>
-                <span class="checkout-word">Checkout</span>
-              </button>
+          } @else if (!paypalLoaded()) {
+            <div class="loading-sdk">
+              <span class="spinner-mini"></span> SECURING PAYMENT GATEWAY...
             </div>
-          </div>
-        }
+          }
 
+          <div id="paypal-button-container" [class.hidden]="!paypalLoaded()"></div>
+        </div>
       </div>
     }
 
-    <!-- Processing Overlay (when card is processed) -->
+    <!-- Processing Overlay (when payment is captured) -->
     @if (isProcessing()) {
       <div class="processing-overlay">
         <div class="spinner-container">
           <div class="pulse-ring"></div>
           <div class="brutalist-spinner"></div>
         </div>
-        <h3 class="status-title">PROCESSING TRANSACTION</h3>
-        <p class="status-subtitle font-mono">CONTACTING ACQUIRING BANK via SSL...</p>
+        <h3 class="status-title">CAPTURING TRANSACTION</h3>
+        <p class="status-subtitle font-mono">VERIFYING WITH PAYPAL SECURE SERVERS...</p>
       </div>
     }
 
@@ -137,58 +92,4 @@
     }
 
   </div>
-
-  <!-- PayPal Simulation Secure Window Overlay -->
-  @if (paypalStage() !== 'none') {
-    <div class="paypal-overlay-window" (click)="$event.stopPropagation()">
-      <div class="paypal-sim-box">
-        <header class="paypal-sim-header">
-          <div class="paypal-sim-logo">
-            <span class="p-letter">P</span> PayPal
-          </div>
-          <div class="secure-badge">
-            <span class="lock-icon">🔒</span> SECURE CONNECTION
-          </div>
-        </header>
-
-        <div class="paypal-sim-content">
-          @if (paypalStage() === 'login') {
-            <div class="paypal-step">
-              <h2>Log in to PayPal</h2>
-              <p class="sub">Salzburger Hof E-commerce Portal</p>
-              
-              <div class="form-row">
-                <input type="email" class="paypal-input" placeholder="Email address" [(ngModel)]="paypalEmail" />
-              </div>
-              <div class="form-row">
-                <input type="password" class="paypal-input" placeholder="Password" [(ngModel)]="paypalPassword" />
-              </div>
-
-              <button class="paypal-blue-btn" [disabled]="!paypalEmail || !paypalPassword" (click)="submitPayPalLogin()">
-                Log In
-              </button>
-              <button class="paypal-cancel-btn" (click)="closePayPalSimulator()">Cancel</button>
-            </div>
-          }
-
-          @if (paypalStage() === 'authorizing') {
-            <div class="paypal-step center-step">
-              <span class="paypal-spinner"></span>
-              <h2>Authorizing Payment</h2>
-              <p class="sub">Checking account balance and routing transactions...</p>
-              <p class="amount-badge">€{{ amount | number:'1.2-2' }} EUR</p>
-            </div>
-          }
-
-          @if (paypalStage() === 'success') {
-            <div class="paypal-step center-step">
-              <div class="paypal-check">✓</div>
-              <h2>Authorization Success</h2>
-              <p class="sub">Returning control back to Salzburger Hof</p>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  }
 </div>

@@ -19,8 +19,7 @@ export class LoginComponent {
   successMsg = signal('');
 
   isRegisterMode = signal(false);
-  registerForm = { username: '', password: '', displayName: '', roomNumber: null as number | null, email: '', phone: '' };
-  roomNumbers = Array.from({ length: 105 }, (_, i) => 101 + i);
+  registerForm = { username: '', password: '', displayName: '', email: '', phone: '' };
 
   readonly hints = [
     { role: 'Admin',        icon: '◆', username: 'admin',          password: 'Admin1234!' },
@@ -96,8 +95,8 @@ export class LoginComponent {
         this.loading.set(false);
         this.isRegisterMode.set(false);
         this.error.set('');
-        this.successMsg.set('Registration successful. Please wait for the reception to verify your room details before logging in.');
-        this.registerForm = { username: '', password: '', displayName: '', roomNumber: null, email: '', phone: '' };
+        this.successMsg.set('Registration successful. You can now log in to proceed with booking your room.');
+        this.registerForm = { username: '', password: '', displayName: '', email: '', phone: '' };
       },
       error: (err) => {
         this.loading.set(false);

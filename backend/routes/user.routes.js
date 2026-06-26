@@ -8,7 +8,21 @@ router.get('/me', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
-    res.json(user);
+
+    let userObj = user.toObject();
+    if (user.role === 'Guest') {
+      const Booking = require('../models/Booking.model');
+      const emailQuery = user.email ? user.email.toLowerCase().trim() : '';
+      const activeBooking = await Booking.findOne({
+        guestEmail: emailQuery,
+        status: { $in: ['Pending', 'Confirmed', 'Active'] }
+      });
+      userObj.activeBooking = activeBooking || null;
+    } else {
+      userObj.activeBooking = null;
+    }
+
+    res.json(userObj);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -95,7 +109,7 @@ router.get('/activity-logs', protect, restrictTo('Admin'), async (req, res) => {
 // PATCH /api/users/:id/status — Admin, Receptionist
 router.patch('/:id/status', protect, restrictTo('Admin', 'Receptionist'), async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, roomNumber } = req.body;
     if (!['Pending', 'Active', 'Rejected'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status.' });
     }
@@ -103,6 +117,9 @@ router.patch('/:id/status', protect, restrictTo('Admin', 'Receptionist'), async 
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     user.accountStatus = status;
+    if (roomNumber !== undefined && roomNumber !== null) {
+      user.roomNumber = Number(roomNumber);
+    }
     await user.save();
 
     if (status === 'Active') {

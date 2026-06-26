@@ -565,8 +565,16 @@
                       </td>
                       <td>{{ guest.createdAt | date:'mediumDate' }}</td>
                       <td class="rc-action-cell">
-                        <button class="btn btn-primary btn-sm" style="background: #2ecc71; border-color: #27ae60;" (click)="approveGuest(guest._id)">Approve</button>
-                        <button class="btn btn-sm" style="background: #e74c3c; border-color: #c0392b; color: #fff; margin-left: 8px;" (click)="rejectGuest(guest._id)">Reject</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <input
+                            type="number"
+                            placeholder="Room #"
+                            [(ngModel)]="assignedRooms[guest._id]"
+                            style="width: 80px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 4px 8px; font-size: 13px;"
+                          />
+                          <button class="btn btn-primary btn-sm" style="background: #2ecc71; border-color: #27ae60;" (click)="approveGuest(guest._id)">Approve</button>
+                          <button class="btn btn-sm" style="background: #e74c3c; border-color: #c0392b; color: #fff;" (click)="rejectGuest(guest._id)">Reject</button>
+                        </div>
                       </td>
                     </tr>
                   }

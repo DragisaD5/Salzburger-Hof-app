@@ -38,10 +38,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// POST /api/bookings/checkout — Processes room booking checkout with simulated payment
+// POST /api/bookings/checkout — Processes room booking checkout with payment
 router.post('/checkout', async (req, res) => {
   try {
-    const { booking, paymentMethod } = req.body;
+    const { booking, paymentMethod, transactionId } = req.body;
     if (!booking) {
       return res.status(400).json({ message: 'Booking details are required.' });
     }
@@ -53,7 +53,7 @@ router.post('/checkout', async (req, res) => {
 
     if (paymentMethod === 'Card' || paymentMethod === 'PayPal') {
       newBookingData.paymentStatus = 'Paid';
-      newBookingData.transactionId = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+      newBookingData.transactionId = transactionId || 'TXN-' + Math.floor(100000 + Math.random() * 900000);
     } else {
       newBookingData.paymentStatus = 'Unpaid';
       newBookingData.paymentMethod = 'Pay At Check-In';

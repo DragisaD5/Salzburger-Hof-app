@@ -56,7 +56,7 @@ export class UserService {
     return this.http.get<any[]>(`${this.base}/activity-logs`);
   }
 
-  updateUserStatus(id: string, status: 'Active' | 'Rejected'): Observable<StaffUser> {
-    return this.http.patch<StaffUser>(`${this.base}/${id}/status`, { status });
+  updateUserStatus(id: string, status: 'Active' | 'Rejected', roomNumber?: number | null): Observable<StaffUser> {
+    return this.http.patch<StaffUser>(`${this.base}/${id}/status`, { status, roomNumber });
   }
 }

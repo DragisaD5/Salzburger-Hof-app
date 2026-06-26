@@ -201,40 +201,19 @@
       @if (isRegisterMode()) {
         <form class="login-form" (ngSubmit)="onRegister()" #registerFormRef="ngForm">
 
-          <div class="reg-grid">
-            <div class="field-group">
-              <label class="field-label" for="reg-name">Full Name</label>
-              <div class="field-wrap">
-                <span class="field-icon">◇</span>
-                <input
-                  id="reg-name"
-                  class="field-input"
-                  type="text"
-                  [(ngModel)]="registerForm.displayName"
-                  name="displayName"
-                  placeholder="e.g. Johann Müller"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="reg-room">Your Suite</label>
-              <div class="field-wrap">
-                <span class="field-icon">⌂</span>
-                <select
-                  id="reg-room"
-                  class="field-input field-select"
-                  [(ngModel)]="registerForm.roomNumber"
-                  name="roomNumber"
-                  required
-                >
-                  <option [ngValue]="null" disabled selected>Select Your Suite</option>
-                  @for (room of roomNumbers; track room) {
-                    <option [ngValue]="room">Room {{ room }}</option>
-                  }
-                </select>
-              </div>
+          <div class="field-group">
+            <label class="field-label" for="reg-name">Full Name</label>
+            <div class="field-wrap">
+              <span class="field-icon">◇</span>
+              <input
+                id="reg-name"
+                class="field-input"
+                type="text"
+                [(ngModel)]="registerForm.displayName"
+                name="displayName"
+                placeholder="e.g. Johann Müller"
+                required
+              />
             </div>
           </div>
 

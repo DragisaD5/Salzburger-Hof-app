@@ -128,6 +128,36 @@ export class HousekeepingDashboardComponent implements OnInit {
     this.saveSessionProgress();
   }
 
+  checkAllItems(): void {
+    const session = this.activeSession();
+    if (!session) return;
+    const updatedChecklist = session.checklist.map((item) => ({ ...item, checked: true }));
+    this.activeSession.set({ ...session, checklist: updatedChecklist });
+    this.saveSessionProgress();
+  }
+
+  quickCleanRoom(room: Room): void {
+    this.roomService.updateStatus(room._id, 'Free', 'Cleaned (Quick Sign-off)').subscribe({
+      next: (updated) => {
+        this.rooms.update((prev) => prev.map((r) => r._id === updated._id ? updated : r));
+        localStorage.removeItem(`hk_session_${room._id}`);
+        this.showToast(`Room ${updated.roomNumber} marked as FREE. Excellent work!`, 'success');
+      },
+      error: () => this.showToast('Failed to complete cleaning.', 'error'),
+    });
+  }
+
+  getCleaningProgress(room: Room): number {
+    const saved = localStorage.getItem(`hk_session_${room._id}`);
+    if (!saved) return 0;
+    try {
+      const parsed = JSON.parse(saved);
+      return parsed?.checklist?.filter((i: any) => i.checked).length ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   get allChecked(): boolean {
     return this.activeSession()?.checklist.every((i) => i.checked) ?? false;
   }

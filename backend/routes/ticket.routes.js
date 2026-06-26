@@ -92,8 +92,8 @@ router.patch('/:id/resolve', protect, restrictTo('Admin', 'Maintenance', 'Recept
   }
 });
 
-// DELETE /api/tickets/:id — Admin only
-router.delete('/:id', protect, restrictTo('Admin'), async (req, res) => {
+// DELETE /api/tickets/:id — Admin, Maintenance, Receptionist
+router.delete('/:id', protect, restrictTo('Admin', 'Maintenance', 'Receptionist'), async (req, res) => {
   try {
     const ticket = await Ticket.findByIdAndDelete(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });

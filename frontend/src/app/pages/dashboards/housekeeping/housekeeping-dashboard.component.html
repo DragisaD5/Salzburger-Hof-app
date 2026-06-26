@@ -96,19 +96,19 @@
         } @else {
           <div class="hk-queue-grid">
             @for (room of dirtyAndCleaningRooms; track room._id) {
-              <div class="hk-queue-card hk-queue-card--{{ room.status.toLowerCase() }}">
+              <div class="hk-queue-card" [class.hk-queue-card--dirty]="room.status === 'Dirty' || (room.status === 'Cleaning' && getCleaningProgress(room) === 0)" [class.hk-queue-card--cleaning]="room.status === 'Cleaning' && getCleaningProgress(room) > 0">
                 <!-- Status stripe is via border-left -->
                 <div class="hk-qc-header">
                   <div>
                     <div class="hk-qc-num">{{ room.roomNumber }}</div>
                     <div class="hk-qc-cat">{{ room.category }}</div>
                   </div>
-                  @if (room.status === 'Dirty') {
+                  @if (room.status === 'Dirty' || (room.status === 'Cleaning' && getCleaningProgress(room) === 0)) {
                     <span class="hk-qc-badge hk-qc-badge--dirty">
                       <span class="hk-qc-dot"></span>Dirty
                     </span>
                   }
-                  @if (room.status === 'Cleaning') {
+                  @if (room.status === 'Cleaning' && getCleaningProgress(room) > 0) {
                     <span class="hk-qc-badge hk-qc-badge--cleaning">
                       <span class="hk-qc-dot"></span>Cleaning
                     </span>
@@ -120,17 +120,28 @@
                   @if (room.isVIP) { <span class="hk-qc-vip">✦ VIP</span> }
                 </div>
 
-                @if (room.status === 'Dirty') {
+                @if (room.status === 'Dirty' || (room.status === 'Cleaning' && getCleaningProgress(room) === 0)) {
                   <button class="hk-start-btn" (click)="startCleaning(room)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     Start Cleaning
                   </button>
                 }
-                @if (room.status === 'Cleaning') {
-                  <button class="hk-resume-btn" (click)="startCleaning(room)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Resume Cleaning
-                  </button>
+                @if (room.status === 'Cleaning' && getCleaningProgress(room) > 0) {
+                  <div class="hk-qc-actions">
+                    <button class="hk-resume-btn" (click)="startCleaning(room)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      Resume
+                    </button>
+                    <button class="hk-quick-clean-btn" [disabled]="getCleaningProgress(room) < 10" (click)="quickCleanRoom(room)">
+                      @if (getCleaningProgress(room) < 10) {
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Locked
+                      } @else {
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Room Cleaned
+                      }
+                    </button>
+                  </div>
                 }
               </div>
             }
@@ -201,10 +212,15 @@
         <div class="hk-modal-right">
           <div class="hk-mr-header">
             <h3 class="hk-mr-title">Cleaning Checklist</h3>
-            <button class="hk-pause-btn" (click)="cancelSession()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Pause & Exit
-            </button>
+            <div class="hk-mr-header-actions">
+              <button class="hk-check-all-btn" (click)="checkAllItems()">
+                Check All
+              </button>
+              <button class="hk-pause-btn" (click)="cancelSession()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Pause & Exit
+              </button>
+            </div>
           </div>
 
           <div class="hk-checklist">
@@ -233,13 +249,18 @@
             @if (allChecked) {
               <div class="hk-all-done">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                All tasks complete — ready to mark as clean!
+                All tasks complete — room is 100% clean!
               </div>
             }
 
             <button class="hk-complete-btn" [disabled]="!allChecked" (click)="completeCleaning()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Mark Room as Clean
+              @if (!allChecked) {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                LOCKED — Must be 100% Clean
+              } @else {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Room Cleaned
+              }
             </button>
           </div>
         </div>

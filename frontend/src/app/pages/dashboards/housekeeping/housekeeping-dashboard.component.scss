@@ -461,6 +461,76 @@
   }
 }
 
+.hk-qc-actions {
+  display: flex;
+  gap: 8px;
+  width: calc(100% - 8px);
+  margin-left: 8px;
+
+  .hk-resume-btn, .hk-quick-clean-btn {
+    flex: 1;
+    width: auto;
+    margin-left: 0;
+    padding: 10px 4px;
+    font-size: 0.72rem;
+  }
+}
+
+.hk-quick-clean-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: linear-gradient(135deg, var(--success), #3d9a60);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+    transform: translateX(-110%);
+    transition: transform 0.55s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45,122,79,0.3);
+
+    &::before { transform: translateX(110%); }
+  }
+
+  &:active { transform: translateY(0); }
+
+  &:focus-visible {
+    outline: 2px solid var(--success);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    background: #2a2a2a !important;
+    color: #666 !important;
+    border: 1px solid #3d3d3d !important;
+    opacity: 0.8;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+
 // ─── EMPTY STATE ────────────────────────────────────────────────────
 .hk-all-spotless {
   display: flex;
@@ -677,6 +747,36 @@
   margin: 0;
 }
 
+.hk-mr-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hk-check-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var(--success);
+    color: var(--success);
+    background: var(--success-bg);
+  }
+}
+
 .hk-pause-btn {
   display: flex;
   align-items: center;
@@ -826,9 +926,14 @@
   }
 
   &:disabled {
-    opacity: 0.5;
+    background: #2a2a2a !important;
+    color: #666 !important;
+    border: 1px solid #3d3d3d !important;
+    opacity: 0.8;
     cursor: not-allowed;
-    background: var(--text-muted);
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
   }
 }
 

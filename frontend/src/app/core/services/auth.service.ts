@@ -13,6 +13,7 @@ export interface AuthUser {
   roomNumber?: number;
   email?: string;
   phoneNumber?: string;
+  accountStatus?: 'Pending' | 'Active' | 'Rejected';
 }
 
 export interface LoginResponse {
@@ -44,7 +45,7 @@ export class AuthService {
       );
   }
 
-  register(data: { username: string; password: string; displayName: string; roomNumber: number | null }): Observable<any> {
+  register(data: { username: string; password: string; displayName: string; email: string; phone: string }): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/auth/register`, data);
   }
 

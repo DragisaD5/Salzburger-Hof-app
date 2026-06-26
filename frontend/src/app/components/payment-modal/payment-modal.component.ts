@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './payment-modal.component.html',
   styleUrls: ['./payment-modal.component.scss']
 })
-export class PaymentModalComponent {
+export class PaymentModalComponent implements OnInit {
   @Input() amount: number = 0;
   @Input() description: string = '';
   @Input() showPayLater: boolean = false;
@@ -20,142 +20,99 @@ export class PaymentModalComponent {
   }>();
   @Output() cancelled = new EventEmitter<void>();
 
-  activeTab = signal<'card' | 'paypal'>('card');
-  
-  // Card Form State
-  cardholderName = '';
-  cardNumber = '';
-  expiry = '';
-  cvv = '';
-  cardErrors = signal<string[]>([]);
-
   // Processing States
   isProcessing = signal(false);
   isSuccess = signal(false);
   
-  // PayPal State
-  paypalStage = signal<'none' | 'login' | 'authorizing' | 'success'>('none');
-  paypalEmail = '';
-  paypalPassword = '';
+  // PayPal SDK Loading States
+  paypalLoaded = signal(false);
+  paypalInitError = signal(false);
 
-  selectTab(tab: 'card' | 'paypal') {
-    if (this.isProcessing() || this.isSuccess()) return;
-    this.activeTab.set(tab);
-    this.cardErrors.set([]);
+  ngOnInit() {
+    this.loadPayPalScript()
+      .then(() => {
+        this.paypalLoaded.set(true);
+        // Ensure DOM container is ready before rendering
+        setTimeout(() => this.initPayPalButtons(), 50);
+      })
+      .catch((err) => {
+        console.error('Failed to load PayPal SDK', err);
+        this.paypalInitError.set(true);
+      });
   }
 
-  // Format Card Number (space every 4 digits)
-  onCardNumberInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 16) value = value.substring(0, 16);
-    this.cardNumber = value.replace(/(.{4})/g, '$1 ').trim();
-  }
-
-  // Format Expiry (MM/YY)
-  onExpiryInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.substring(0, 4);
-    if (value.length >= 2) {
-      this.expiry = value.substring(0, 2) + '/' + value.substring(2);
-    } else {
-      this.expiry = value;
+  loadPayPalScript(): Promise<void> {
+    if ((window as any).paypal) {
+      return Promise.resolve();
     }
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://www.paypal.com/sdk/js?client-id=sb&currency=EUR';
+      script.id = 'paypal-sdk';
+      script.onload = () => resolve();
+      script.onerror = (err) => reject(err);
+      document.head.appendChild(script);
+    });
   }
 
-  // Format CVV
-  onCvvInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 3) value = value.substring(0, 3);
-    this.cvv = value;
-  }
+  initPayPalButtons() {
+    const paypal = (window as any).paypal;
+    if (!paypal) {
+      this.paypalInitError.set(true);
+      return;
+    }
 
-  validateCard(): boolean {
-    const errors: string[] = [];
-    if (!this.cardholderName.trim()) {
-      errors.push('Cardholder Name is required.');
-    }
-    const rawCard = this.cardNumber.replace(/\s/g, '');
-    if (rawCard.length !== 16) {
-      errors.push('Card number must be 16 digits.');
-    }
-    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(this.expiry)) {
-      errors.push('Expiry must be in MM/YY format.');
-    } else {
-      // Basic check for past date
-      const parts = this.expiry.split('/');
-      const month = parseInt(parts[0], 10);
-      const year = parseInt('20' + parts[1], 10);
-      const now = new Date();
-      const currentMonth = now.getMonth() + 1;
-      const currentYear = now.getFullYear();
-      if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        errors.push('Card has expired.');
+    paypal.Buttons({
+      createOrder: (data: any, actions: any) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              currency_code: 'EUR',
+              value: this.amount.toFixed(2)
+            },
+            description: this.description || 'Hotel Salzburger-Hof Booking'
+          }]
+        });
+      },
+      onApprove: (data: any, actions: any) => {
+        this.isProcessing.set(true);
+        return actions.order.capture().then((details: any) => {
+          this.isProcessing.set(false);
+          this.isSuccess.set(true);
+          
+          // Emit after showing checkout success briefly
+          setTimeout(() => {
+            const txnId = details.id || 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+            this.paymentCompleted.emit({
+              paymentMethod: 'PayPal',
+              transactionId: txnId
+            });
+          }, 1800);
+        }).catch((err: any) => {
+          this.isProcessing.set(false);
+          console.error('PayPal Order Capture Failed', err);
+          alert('Failed to capture PayPal transaction. Please try again.');
+        });
+      },
+      onError: (err: any) => {
+        this.isProcessing.set(false);
+        console.error('PayPal Smart Button error', err);
       }
-    }
-    if (this.cvv.length !== 3) {
-      errors.push('CVV must be 3 digits.');
-    }
-
-    this.cardErrors.set(errors);
-    return errors.length === 0;
+    }).render('#paypal-button-container');
   }
 
-  payWithCard() {
-    if (!this.validateCard()) return;
+  simulateSuccessPayment() {
     this.isProcessing.set(true);
-
-    // Simulate bank communication
     setTimeout(() => {
       this.isProcessing.set(false);
       this.isSuccess.set(true);
-
-      // Finish transaction after showing luxury success state briefly
       setTimeout(() => {
-        const txnId = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
         this.paymentCompleted.emit({
-          paymentMethod: 'Card',
-          transactionId: txnId
+          paymentMethod: 'PayPal',
+          transactionId: 'SIM-TXN-' + Math.floor(100000 + Math.random() * 900000)
         });
-      }, 1800);
-    }, 2200);
-  }
-
-  openPayPalSimulator() {
-    if (this.isProcessing() || this.isSuccess()) return;
-    this.paypalStage.set('login');
-    this.paypalEmail = '';
-    this.paypalPassword = '';
-  }
-
-  submitPayPalLogin() {
-    if (!this.paypalEmail || !this.paypalPassword) return;
-    this.paypalStage.set('authorizing');
-    
-    // Simulate transaction authorization
-    setTimeout(() => {
-      this.paypalStage.set('success');
-      
-      setTimeout(() => {
-        this.paypalStage.set('none');
-        this.isSuccess.set(true);
-
-        setTimeout(() => {
-          const txnId = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
-          this.paymentCompleted.emit({
-            paymentMethod: 'PayPal',
-            transactionId: txnId
-          });
-        }, 1500);
-      }, 1500);
-    }, 2000);
-  }
-
-  closePayPalSimulator() {
-    if (this.paypalStage() === 'authorizing' || this.paypalStage() === 'success') return;
-    this.paypalStage.set('none');
+      }, 1000);
+    }, 1000);
   }
 
   payLater() {

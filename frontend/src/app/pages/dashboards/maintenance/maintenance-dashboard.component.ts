@@ -46,12 +46,12 @@ export class MaintenanceDashboardComponent implements OnInit {
     this.ticketService.getStats({ type: 'Maintenance' }).subscribe({ next: (s) => this.stats.set(s) });
   }
 
-  resolveTicket(ticket: Ticket, notes?: string): void {
-    this.ticketService.resolveTicket(ticket._id, notes).subscribe({
-      next: (updated) => {
-        this.tickets.update((prev) => prev.map((t) => t._id === updated._id ? updated : t));
+  resolveTicket(ticket: Ticket): void {
+    this.ticketService.deleteTicket(ticket._id).subscribe({
+      next: () => {
+        this.tickets.update((prev) => prev.filter((t) => t._id !== ticket._id));
         this.ticketService.getStats({ type: 'Maintenance' }).subscribe((s) => this.stats.set(s));
-        this.showToast(`Ticket #${updated.roomNumber} resolved.`, 'success');
+        this.showToast(`Ticket #${ticket.roomNumber} resolved and removed.`, 'success');
       },
       error: () => this.showToast('Failed to resolve ticket.', 'error'),
     });

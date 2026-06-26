@@ -22,9 +22,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    if (user.role === 'Guest' && user.accountStatus === 'Pending') {
-      return res.status(403).json({ message: 'Your account is currently pending verification by the Reception.' });
-    }
     if (user.role === 'Guest' && user.accountStatus === 'Rejected') {
       return res.status(403).json({ message: 'Your registration request has been rejected by the Reception.' });
     }
@@ -55,6 +52,7 @@ router.post('/login', async (req, res) => {
         roomNumber: user.roomNumber,
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
+        accountStatus: user.accountStatus,
       },
     });
   } catch (err) {
@@ -123,6 +121,7 @@ router.post('/register', async (req, res) => {
         roomNumber: user.roomNumber,
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
+        accountStatus: user.accountStatus,
       },
     });
   } catch (err) {

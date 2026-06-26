@@ -271,67 +271,49 @@
   vertical-align: middle;
 }
 
-// ─── PAYPAL TAB ────────────────────────────────────────────────────
-.center-pane {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+// ─── PAYPAL CONTENT ────────────────────────────────────────────────
+.paypal-content {
+  width: 100%;
 }
 
 .paypal-intro {
-  padding: 20px;
+  padding: 10px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  max-width: 360px;
+  gap: 20px;
+  width: 100%;
 
   .paypal-info {
     font-family: var(--font-body);
     font-style: italic;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-muted);
     line-height: 1.6;
+    text-align: center;
+    margin-bottom: 10px;
   }
 }
 
-.paypal-smart-btn {
-  background: #ffc439;
-  border: none;
-  border-radius: 0px; // Brutalist
-  padding: 14px 40px;
+.loading-sdk {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--accent-amber);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 20px 0;
+}
+
+#paypal-button-container {
   width: 100%;
+  animation: fade-in-overlay 0.3s ease forwards;
+}
 
-  &:hover {
-    background: #f2ba36;
-    transform: scale(1.02);
-    box-shadow: 0 4px 15px rgba(255, 196, 57, 0.35);
-  }
-
-  .paypal-wordmark {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 18px;
-    font-weight: 900;
-    font-style: italic;
-    letter-spacing: -0.05em;
-
-    .pay { color: #003087; }
-    .pal { color: #0079c1; }
-  }
-
-  .checkout-word {
-    font-family: var(--font-ui);
-    font-size: 13px;
-    font-weight: 700;
-    color: #003087;
-  }
+.hidden {
+  display: none !important;
 }
 
 // ─── ERROR PANEL ───────────────────────────────────────────────────

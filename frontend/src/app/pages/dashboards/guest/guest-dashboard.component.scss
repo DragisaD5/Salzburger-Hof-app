@@ -410,3 +410,450 @@
 .error-msg {
   font-size: 13px;
 }
+
+/* ── State Containers ─────────────────────────────────────── */
+.state-container {
+  animation: fadeIn 0.4s ease-out;
+  
+  &.state-booking {
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+  }
+}
+
+.state-header-panel {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .state-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent-amber);
+    margin-bottom: 8px;
+  }
+
+  .state-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+}
+
+/* ── State 1 Booking Box ──────────────────────────────────── */
+.brutalist-booking-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent-amber);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+
+  .booking-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .addons-checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+    grid-column: 1 / -1;
+  }
+
+  .addon-checkbox-label {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all var(--transition);
+
+    input {
+      margin-top: 3px;
+      accent-color: var(--accent-amber);
+    }
+
+    &:hover {
+      border-color: var(--accent-amber);
+      background: rgba(212, 168, 87, 0.05);
+    }
+  }
+
+  .addon-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .addon-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .addon-price {
+      font-size: 11px;
+      color: var(--accent-amber);
+      font-family: var(--font-ui);
+    }
+  }
+
+  .booking-error {
+    grid-column: 1 / -1;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 12px;
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  .booking-summary-box {
+    margin-top: 24px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+
+      &.addon {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      &.total {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0;
+
+        span:last-child {
+          color: var(--accent-amber);
+        }
+      }
+    }
+
+    .summary-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+  }
+
+  .booking-submit-btn {
+    width: 100%;
+    margin-top: 24px;
+    background: linear-gradient(135deg, #7c5a1a 0%, #b8762a 100%);
+    border: 1px solid #7c5a1a;
+    border-radius: var(--radius-lg);
+    color: #fff;
+    padding: 16px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    &:hover:not([disabled]) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(184, 118, 42, 0.4);
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* ── State 2 Awaiting Check-In ────────────────────────────── */
+.awaiting-glow-card {
+  max-width: 700px;
+  margin: 40px auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(212, 168, 87, 0.08);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent-amber), transparent);
+  }
+
+  .lux-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(212, 168, 87, 0.1);
+    border: 1px solid rgba(212, 168, 87, 0.25);
+    border-radius: 100px;
+    color: var(--accent-amber);
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    margin-bottom: 24px;
+  }
+
+  .awaiting-title {
+    font-size: clamp(28px, 4vw, 42px);
+    margin-bottom: 16px;
+    font-weight: 300;
+  }
+
+  .pulsating-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-secondary);
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      box-shadow: 0 0 8px var(--accent-amber);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .status-lbl {
+      font-size: 12px;
+      font-family: var(--font-ui);
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+  }
+
+  .awaiting-instruction {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .reservation-receipt {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    text-align: left;
+    margin-bottom: 32px;
+
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .receipt-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .receipt-lbl {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .receipt-val {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+
+      &.price {
+        color: var(--accent-amber);
+        font-weight: 600;
+      }
+    }
+
+    .receipt-addons {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .addons-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .addon-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .next-step-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    background: rgba(212, 168, 87, 0.03);
+    border: 1px dashed rgba(212, 168, 87, 0.2);
+    border-radius: var(--radius-lg);
+    text-align: left;
+
+    .next-step-icon {
+      font-size: 24px;
+    }
+
+    .next-step-text {
+      h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-amber);
+        margin-bottom: 4px;
+      }
+      p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+/* ── State 3 Checked-In Digital Key ───────────────────────── */
+.digital-key-panel {
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.digital-key-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f9f8f5 100%);
+  border: 2px solid rgba(212, 168, 87, 0.6);
+  border-radius: var(--radius-xl);
+  padding: 24px 48px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 168, 87, 0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .key-icon {
+    font-size: 32px;
+    z-index: 2;
+    transition: transform 0.3s;
+  }
+
+  .key-lbl {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #1a1a1a;
+    z-index: 2;
+  }
+
+  .key-ring-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(212, 168, 87, 0.15);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    z-index: 1;
+  }
+
+  &:hover {
+    border-color: var(--accent-amber);
+    box-shadow: 0 12px 40px rgba(212, 168, 87, 0.2);
+    transform: translateY(-2px);
+
+    &::before { opacity: 1; }
+    .key-icon { transform: scale(1.1) rotate(-10deg); }
+  }
+
+  &.unlocked {
+    border-color: #2ecc71;
+    background: linear-gradient(135deg, #ffffff 0%, #eafaf1 100%);
+    box-shadow: 0 12px 40px rgba(46, 204, 113, 0.2);
+    
+    .key-lbl {
+      color: #27ae60;
+    }
+
+    .key-ring-animation {
+      animation: keyRipples 1.5s ease-out infinite;
+    }
+  }
+}
+
+/* ── Keyframe Animations ──────────────────────────────────── */
+@keyframes pulseGlow {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(212, 168, 87, 0.7); }
+  70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 10px rgba(212, 168, 87, 0); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(212, 168, 87, 0); }
+}
+
+@keyframes keyRipples {
+  0% { width: 0px; height: 0px; opacity: 0.5; }
+  100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

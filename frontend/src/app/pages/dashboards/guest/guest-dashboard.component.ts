@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TicketService, Ticket } from '../../../core/services/ticket.service';
 import { RoomService, Room } from '../../../core/services/room.service';
 import { UserService } from '../../../core/services/user.service';
+import { BookingService, Booking } from '../../../core/services/booking.service';
 import { PaymentModalComponent } from '../../../components/payment-modal/payment-modal.component';
 
 @Component({
@@ -20,6 +21,33 @@ export class GuestDashboardComponent implements OnInit {
   myRoom = signal<Room | null>(null);
   loading = signal(true);
   
+  activeBooking = signal<Booking | null>(null);
+
+  // Booking form state
+  bookingForm = {
+    guestName: '',
+    guestEmail: '',
+    checkIn: '',
+    checkOut: '',
+    roomType: 'Deluxe',
+    adults: 2,
+    children: 0,
+  };
+  bookingLoading = signal(false);
+  bookingSuccess = signal(false);
+  bookingError = signal('');
+  bookingNights = signal(0);
+  bookingTotal = signal(0);
+  pendingBookingData = signal<any>(null);
+
+  selectedAddons = {
+    spa: false,
+    ski: false,
+    dining: false,
+  };
+  showAddonsDropdown = signal(false);
+  readonly roomTypes = ['Standard', 'Deluxe', 'Suite', 'Penthouse'];
+
   // Interactive Panel State
   activeActionTab = signal<'none' | 'maintenance' | 'room-service' | 'spa' | 'dining' | 'profile'>('none');
   ticketSuccess = signal('');
@@ -68,36 +96,71 @@ export class GuestDashboardComponent implements OnInit {
     private auth: AuthService,
     private ticketService: TicketService,
     private roomService: RoomService,
-    private userService: UserService
+    private userService: UserService,
+    private bookingService: BookingService
   ) {
     this.user = auth.currentUser();
   }
 
   ngOnInit(): void {
-    // Initialize profile form
-    this.profileForm.displayName = this.user?.displayName || '';
-    this.profileForm.email = this.user?.email || '';
-    this.profileForm.phoneNumber = this.user?.phoneNumber || '';
+    this.loading.set(true);
 
-    const roomNum = this.user?.roomNumber;
-    if (roomNum) {
-      this.ticketService.getTickets({ roomNumber: roomNum }).subscribe({
-        next: (t) => {
-          this.tickets.set(t);
+    // Set min date to today for booking form
+    const today = new Date().toISOString().split('T')[0];
+    this.bookingForm.checkIn = today;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 3);
+    this.bookingForm.checkOut = tomorrow.toISOString().split('T')[0];
+
+    this.userService.getMe().subscribe({
+      next: (freshUser: any) => {
+        const authUser = {
+          id: freshUser._id,
+          username: freshUser.username,
+          displayName: freshUser.displayName || '',
+          role: freshUser.role,
+          roomNumber: freshUser.roomNumber,
+          email: freshUser.email,
+          phoneNumber: freshUser.phoneNumber || freshUser.phone || '',
+          accountStatus: freshUser.accountStatus,
+        };
+        this.auth.updateCurrentUser(authUser);
+        this.user = authUser;
+        this.activeBooking.set(freshUser.activeBooking);
+
+        // Prepopulate booking form name and email
+        this.bookingForm.guestName = this.user.displayName;
+        this.bookingForm.guestEmail = this.user.email;
+
+        // Initialize profile form
+        this.profileForm.displayName = this.user.displayName;
+        this.profileForm.email = this.user.email;
+        this.profileForm.phoneNumber = this.user.phoneNumber;
+
+        const roomNum = this.user.roomNumber;
+        if (roomNum) {
+          this.ticketService.getTickets({ roomNumber: roomNum }).subscribe({
+            next: (t) => {
+              this.tickets.set(t);
+              this.loading.set(false);
+            },
+            error: () => this.loading.set(false),
+          });
+
+          this.roomService.getRooms().subscribe({
+            next: (rooms) => {
+              const r = rooms.find((room) => room.roomNumber === roomNum);
+              this.myRoom.set(r ?? null);
+            },
+          });
+        } else {
           this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
-
-      this.roomService.getRooms().subscribe({
-        next: (rooms) => {
-          const r = rooms.find((room) => room.roomNumber === roomNum);
-          this.myRoom.set(r ?? null);
-        },
-      });
-    } else {
-      this.loading.set(false);
-    }
+        }
+      },
+      error: () => {
+        this.loading.set(false);
+      }
+    });
   }
 
   toggleActionTab(tab: 'maintenance' | 'room-service' | 'spa' | 'dining' | 'profile'): void {
@@ -110,12 +173,12 @@ export class GuestDashboardComponent implements OnInit {
   }
 
   // Generic request submitter mapped to Tickets
-  private submitServiceRequest(category: any, description: string, successMessage: string, type: 'Maintenance' | 'RoomService' = 'Maintenance') {
+  private submitServiceRequest(category: any, description: string, successMessage: string, type: 'Maintenance' | 'RoomService' = 'Maintenance', priority: 'Low' | 'High' | 'URGENT' = 'Low') {
     this.ticketError.set('');
     this.ticketService.createTicket({
       roomNumber: this.user?.roomNumber!,
       category: category,
-      priority: 'Low',
+      priority: priority,
       description: description,
       type: type,
     }).subscribe({
@@ -136,7 +199,7 @@ export class GuestDashboardComponent implements OnInit {
       this.ticketError.set('Please describe your request.');
       return;
     }
-    this.submitServiceRequest(this.newTicket.category, this.newTicket.description, 'Your request has been submitted. Our team will attend to it shortly.', 'Maintenance');
+    this.submitServiceRequest(this.newTicket.category, this.newTicket.description, 'Your request has been submitted. Our team will attend to it shortly.', 'Maintenance', this.newTicket.priority);
     this.newTicket = { category: 'General', priority: 'Low', description: '' };
   }
 
@@ -207,38 +270,136 @@ export class GuestDashboardComponent implements OnInit {
     this.spaForm = { treatmentId: '', date: '', time: '' };
   }
 
-  onPaymentCompleted(result: { paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In'; transactionId?: string }): void {
-    this.showPaymentModal.set(false);
-    const ticketData = this.pendingTicketData();
-    if (!ticketData) return;
+  toggleAddonsDropdown(): void {
+    this.showAddonsDropdown.set(!this.showAddonsDropdown());
+  }
 
-    this.ticketError.set('');
+  getAddonsList(): string[] {
+    const list: string[] = [];
+    if (this.selectedAddons.spa) list.push('Spa Access');
+    if (this.selectedAddons.ski) list.push('Ski Pass');
+    if (this.selectedAddons.dining) list.push('Fine Dining');
+    return list;
+  }
 
-    const completedTicket = {
-      ...ticketData,
-      paymentStatus: 'Paid' as 'Paid',
-      paymentMethod: result.paymentMethod as 'Card' | 'PayPal',
-      transactionId: result.transactionId
+  calculateTotalPrice(): number {
+    const checkIn = new Date(this.bookingForm.checkIn);
+    const checkOut = new Date(this.bookingForm.checkOut);
+    let nights = 0;
+    if (checkIn && checkOut && checkOut.getTime() > checkIn.getTime()) {
+      nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000);
+    }
+    nights = Math.max(1, nights);
+
+    const prices: Record<string, number> = { Standard: 160, Deluxe: 280, Suite: 450, Penthouse: 850 };
+    const roomRate = prices[this.bookingForm.roomType] || 280;
+    let total = roomRate * nights;
+
+    if (this.selectedAddons.spa) total += 120;
+    if (this.selectedAddons.ski) total += 150;
+    if (this.selectedAddons.dining) total += 80;
+
+    return total;
+  }
+
+  calculateNights(): number {
+    const checkIn = new Date(this.bookingForm.checkIn);
+    const checkOut = new Date(this.bookingForm.checkOut);
+    if (checkIn && checkOut && checkOut.getTime() > checkIn.getTime()) {
+      return Math.max(1, Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000));
+    }
+    return 1;
+  }
+
+  getBasePrice(): number {
+    const prices: Record<string, number> = { Standard: 160, Deluxe: 280, Suite: 450, Penthouse: 850 };
+    return (prices[this.bookingForm.roomType] || 280) * this.calculateNights();
+  }
+
+  submitBooking(): void {
+    if (!this.bookingForm.guestName || !this.bookingForm.guestEmail) {
+      this.bookingError.set('Please fill in your name and email.');
+      return;
+    }
+    this.bookingError.set('');
+
+    const nights = this.calculateNights();
+    const total = this.calculateTotalPrice();
+
+    const bookingData = {
+      ...this.bookingForm,
+      checkIn: this.bookingForm.checkIn,
+      checkOut: this.bookingForm.checkOut,
+      status: 'Pending' as 'Pending',
+      source: 'Online',
+      totalPrice: total,
+      addons: this.getAddonsList(),
     };
 
-    this.ticketService.createTicket(completedTicket).subscribe({
-      next: (ticket) => {
-        this.tickets.update((prev) => [ticket, ...prev]);
-        this.ticketSuccess.set('Your order has been paid and confirmed! Check your requests below.');
-        this.activeActionTab.set('none');
-        this.pendingTicketData.set(null);
-        setTimeout(() => this.ticketSuccess.set(''), 5000);
-      },
-      error: (err) => {
-        this.ticketError.set(err.error?.message || 'Failed to submit request.');
-        this.pendingTicketData.set(null);
-      },
-    });
+    this.pendingBookingData.set(bookingData);
+    this.paymentAmount.set(total);
+    this.paymentDescription.set(`Room Reservation: ${this.bookingForm.roomType}`);
+    this.showPaymentModal.set(true);
+  }
+
+  onPaymentCompleted(result: { paymentMethod: 'Card' | 'PayPal' | 'Pay At Check-In'; transactionId?: string }): void {
+    this.showPaymentModal.set(false);
+    
+    if (this.pendingBookingData()) {
+      this.bookingLoading.set(true);
+      const bookingData = this.pendingBookingData();
+      this.bookingError.set('');
+      
+      this.bookingService.checkoutBooking(bookingData, result.paymentMethod, result.transactionId).subscribe({
+        next: (createdBooking: any) => {
+          this.bookingLoading.set(false);
+          this.bookingSuccess.set(true);
+          this.pendingBookingData.set(null);
+          this.activeBooking.set(createdBooking);
+          this.selectedAddons = { spa: false, ski: false, dining: false };
+          
+          // Re-fetch user profile to sync check-in status
+          this.ngOnInit();
+        },
+        error: (err) => {
+          this.bookingLoading.set(false);
+          this.bookingError.set(err.error?.message || 'Booking checkout failed. Please try again.');
+          this.pendingBookingData.set(null);
+        }
+      });
+    } else if (this.pendingTicketData()) {
+      const ticketData = this.pendingTicketData();
+      if (!ticketData) return;
+
+      this.ticketError.set('');
+
+      const completedTicket = {
+        ...ticketData,
+        paymentStatus: 'Paid' as 'Paid',
+        paymentMethod: result.paymentMethod as 'Card' | 'PayPal',
+        transactionId: result.transactionId
+      };
+
+      this.ticketService.createTicket(completedTicket).subscribe({
+        next: (ticket) => {
+          this.tickets.update((prev) => [ticket, ...prev]);
+          this.ticketSuccess.set('Your order has been paid and confirmed! Check your requests below.');
+          this.activeActionTab.set('none');
+          this.pendingTicketData.set(null);
+          setTimeout(() => this.ticketSuccess.set(''), 5000);
+        },
+        error: (err) => {
+          this.ticketError.set(err.error?.message || 'Failed to submit request.');
+          this.pendingTicketData.set(null);
+        },
+      });
+    }
   }
 
   onPaymentCancelled(): void {
     this.showPaymentModal.set(false);
     this.pendingTicketData.set(null);
+    this.pendingBookingData.set(null);
   }
 
   submitDiningBooking(): void {
@@ -311,5 +472,17 @@ export class GuestDashboardComponent implements OnInit {
         this.ticketError.set(err.error?.message || 'Failed to update profile.');
       },
     });
+  }
+
+  doorUnlocked = signal(false);
+  toggleDoorLock() {
+    this.doorUnlocked.set(!this.doorUnlocked());
+    if (this.doorUnlocked()) {
+      this.ticketSuccess.set('Digital Key Active — Suite Door Unlocked!');
+      setTimeout(() => this.ticketSuccess.set(''), 3000);
+    } else {
+      this.ticketSuccess.set('Suite Door Locked Securely.');
+      setTimeout(() => this.ticketSuccess.set(''), 3000);
+    }
   }
 }

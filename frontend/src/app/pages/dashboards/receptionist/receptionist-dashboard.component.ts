@@ -26,6 +26,7 @@ export class ReceptionistDashboardComponent implements OnInit {
   loading = signal(true);
   toast = signal('');
   toastType = signal<'success' | 'error'>('success');
+  assignedRooms: Record<string, number | null> = {};
 
   statusFilter = signal('');
 
@@ -192,10 +193,15 @@ export class ReceptionistDashboardComponent implements OnInit {
   }
 
   approveGuest(guestId: string): void {
-    this.userService.updateUserStatus(guestId, 'Active').subscribe({
+    const roomNum = this.assignedRooms[guestId];
+    if (!roomNum) {
+      this.showToast('Please enter a room number to assign.', 'error');
+      return;
+    }
+    this.userService.updateUserStatus(guestId, 'Active', roomNum).subscribe({
       next: () => {
         this.pendingGuests.update((prev) => prev.filter((g) => g._id !== guestId));
-        this.showToast('Guest account approved.', 'success');
+        this.showToast(`Guest account approved and Room ${roomNum} assigned.`, 'success');
       },
       error: () => this.showToast('Failed to approve guest.', 'error')
     });
